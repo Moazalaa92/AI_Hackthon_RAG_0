@@ -1,0 +1,147 @@
+{
+  "dataset_version": 1,
+  "created": "2026-08-17",
+  "description": "Retrieval evaluation questions for Project_pdf.pdf (NICE NG217 epilepsy guideline)",
+  "questions": [
+    {
+      "id": "Q01",
+      "question": "How does the guideline define drug-resistant epilepsy?",
+      "category": "definition",
+      "expected_pages": [148],
+      "notes": "Look in 'Terms used in this guideline' for the ILAE-based definition mentioning failure of 2 tolerated, appropriately chosen antiseizure medication schedules."
+    },
+    {
+      "id": "Q02",
+      "question": "What are the typical clinical features of an absence seizure?",
+      "category": "clinical_features",
+      "expected_pages": [78],
+      "notes": "Look in the 'Why the committee made these recommendations' section for absence seizures: lack of awareness, stopping moving or talking, staring blankly."
+    },
+    {
+      "id": "Q03",
+      "question": "Can a routine EEG be used to exclude a diagnosis of epilepsy?",
+      "category": "diagnosis",
+      "expected_pages": [14],
+      "notes": "Look for recommendation 1.2.6: 'Do not use EEG to exclude a diagnosis of epilepsy.' Negative-phrased answer; EEG supports but cannot rule out."
+    },
+    {
+      "id": "Q04",
+      "question": "Within what time frame should an EEG be carried out after a first seizure?",
+      "category": "diagnosis",
+      "expected_pages": [14],
+      "notes": "Look for recommendation 1.2.7: as soon as possible, ideally within 72 hours after the seizure."
+    },
+    {
+      "id": "Q05",
+      "question": "Within how many weeks should an MRI be carried out after a person is diagnosed with epilepsy?",
+      "category": "diagnosis",
+      "expected_pages": [18],
+      "notes": "Look for recommendation 1.3.1: MRI within 6 weeks of the MRI referral, following regionally agreed epilepsy MRI protocols."
+    },
+    {
+      "id": "Q06",
+      "question": "When should whole-genome sequencing be considered for a person with epilepsy of unknown cause?",
+      "category": "diagnosis",
+      "expected_pages": [22],
+      "notes": "Look for recommendations 1.4.4-1.4.5: onset under 2 years, features of a specific genetic syndrome, or additional features like learning disability; ages 2-3 with MDT agreement."
+    },
+    {
+      "id": "Q07",
+      "question": "Within what time should a child, young person or adult be referred after a first suspected seizure?",
+      "category": "referral",
+      "expected_pages": [9],
+      "notes": "Look for recommendation 1.1.1: urgent referral for an assessment within 2 weeks."
+    },
+    {
+      "id": "Q08",
+      "question": "Which children with suspected or confirmed epilepsy should be referred urgently to a tertiary paediatric epilepsy service?",
+      "category": "referral",
+      "expected_pages": [35],
+      "notes": "Look for recommendation 3.1.4: aged under 3 years, under 4 years with myoclonic seizures, unilateral structural lesion, or deterioration in behaviour/speech/learning. Seen within 2 weeks."
+    },
+    {
+      "id": "Q09",
+      "question": "Which medicines are offered as first-line monotherapy for generalised tonic-clonic seizures?",
+      "category": "treatment",
+      "expected_pages": [65],
+      "notes": "Look for recommendation 5.1.1: a choice of lamotrigine, levetiracetam or sodium valproate, with MHRA valproate safety measures."
+    },
+    {
+      "id": "Q10",
+      "question": "Which medicines are recommended as first-line monotherapy for focal seizures?",
+      "category": "treatment",
+      "expected_pages": [70],
+      "notes": "Look for recommendation 5.2.1: lamotrigine or levetiracetam."
+    },
+    {
+      "id": "Q11",
+      "question": "Which medicine is offered as first-line treatment for absence seizures?",
+      "category": "treatment",
+      "expected_pages": [75],
+      "notes": "Look for recommendation 5.3.1: ethosuximide. Watch out for absence seizures with other seizure types, which have a different first-line recommendation (5.3.4)."
+    },
+    {
+      "id": "Q12",
+      "question": "Which medicine is recommended as first-line treatment for Dravet syndrome?",
+      "category": "treatment",
+      "expected_pages": [93],
+      "notes": "Look for recommendation 6.1.2: sodium valproate, used with caution but recommended first-line because of syndrome severity and lack of alternatives."
+    },
+    {
+      "id": "Q13",
+      "question": "Which medicine is recommended as first-line treatment for Lennox-Gastaut syndrome?",
+      "category": "treatment",
+      "expected_pages": [98],
+      "notes": "Look for recommendation 6.2.2: sodium valproate. Semantically very similar chunk to Q12 (Dravet) - a deliberate retrieval challenge."
+    },
+    {
+      "id": "Q14",
+      "question": "What is the first-line treatment for infantile spasms that are not due to tuberous sclerosis?",
+      "category": "treatment",
+      "expected_pages": [103],
+      "notes": "Look for recommendation 6.3.4: combination therapy with high-dose oral prednisolone and vigabatrin, unless at high risk of steroid-related side effects."
+    },
+    {
+      "id": "Q15",
+      "question": "Under what circumstances can sodium valproate be started for the first time in a person younger than 55 years?",
+      "category": "medication_safety",
+      "expected_pages": [65],
+      "notes": "Look in Box 2 (MHRA safety measures): only if 2 specialists independently agree and document there is no other effective and tolerated treatment, or reproductive risks do not apply."
+    },
+    {
+      "id": "Q16",
+      "question": "When is it acceptable to use topiramate in women and girls of childbearing potential?",
+      "category": "medication_safety",
+      "expected_pages": [6, 66],
+      "notes": "Topiramate appears in many sections. The core rule (overview and 5.1.2): only if the conditions of the Pregnancy Prevention Programme are fulfilled. Related info appears in multiple places."
+    },
+    {
+      "id": "Q17",
+      "question": "Over what period should antiseizure medication be reduced when a decision is made to discontinue it?",
+      "category": "management",
+      "expected_pages": [60, 61],
+      "notes": "Look for recommendation 4.6.4-4.6.5: gradually - most medicines over at least 3 months; benzodiazepines and barbiturates over a longer period; stop multiple medicines one at a time."
+    },
+    {
+      "id": "Q18",
+      "question": "When is more frequent monitoring recommended for a pregnant woman with epilepsy?",
+      "category": "monitoring",
+      "expected_pages": [57],
+      "notes": "Look for recommendation 4.5.6: consider more frequent monitoring reviews for pregnant women who have a learning disability, are under 16, have active epilepsy, bilateral tonic-clonic seizures, or modifiable SUDEP risk factors."
+    },
+    {
+      "id": "Q19",
+      "question": "What are the potentially modifiable risk factors for sudden unexpected death in epilepsy (SUDEP)?",
+      "category": "prognosis_risk",
+      "expected_pages": [136],
+      "notes": "Look for recommendation 10.1.2: non-adherence to medication, alcohol and drug misuse, focal to bilateral tonic-clonic or generalised tonic-clonic seizures, uncontrolled seizures, living alone, sleeping alone without supervision."
+    },
+    {
+      "id": "Q20",
+      "question": "What is the recommended starting dose of levetiracetam for an adult with epilepsy?",
+      "category": "not_answerable",
+      "expected_pages": [],
+      "notes": "Deliberate negative case. The guideline recommends levetiracetam as a treatment option but does not state doses - it defers to the BNF. There is no dosing information in this PDF, so the question is intentionally not answerable."
+    }
+  ]
+}

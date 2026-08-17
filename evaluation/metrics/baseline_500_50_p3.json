@@ -1,0 +1,108 @@
+{
+  "experiment": "baseline_500_50",
+  "k": 3,
+  "mean_precision": 0.383333,
+  "per_question": {
+    "Q01": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q02": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q03": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q04": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q05": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q06": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q07": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 3
+    },
+    "Q08": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q09": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q10": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q11": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 3
+    },
+    "Q12": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q13": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q14": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q15": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q16": {
+      "precision": 0.666667,
+      "relevant": 2,
+      "n": 3
+    },
+    "Q17": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q18": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 3
+    },
+    "Q19": {
+      "precision": 0.333333,
+      "relevant": 1,
+      "n": 3
+    },
+    "Q20": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 3
+    }
+  },
+  "caveat": "LLM-judged retrieval relevance (deepseek/deepseek-v4-flash, temp 0). These are NOT clinical ground truth; they are a proxy for retrieval quality."
+}

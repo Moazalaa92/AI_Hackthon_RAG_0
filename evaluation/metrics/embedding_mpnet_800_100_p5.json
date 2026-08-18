@@ -1,0 +1,108 @@
+{
+  "experiment": "embedding_mpnet_800_100",
+  "k": 5,
+  "mean_precision": 0.28,
+  "per_question": {
+    "Q01": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q02": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q03": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "Q04": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q05": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q06": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "Q07": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q08": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q09": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 5
+    },
+    "Q10": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q11": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q12": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q13": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q14": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q15": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "Q16": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 5
+    },
+    "Q17": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q18": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q19": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "Q20": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 5
+    }
+  },
+  "caveat": "LLM-judged retrieval relevance (deepseek/deepseek-v4-flash, temp 0). These are NOT clinical ground truth; they are a proxy for retrieval quality."
+}

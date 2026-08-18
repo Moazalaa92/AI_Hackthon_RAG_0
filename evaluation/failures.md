@@ -132,3 +132,48 @@ These are candidate experiments only. They are not run and no chunk configuratio
 ## Verification
 
 Re-run `scripts/inspect_results.py` for Q07, Q11, Q17, Q18 to confirm the documented ranks/scores/pages match the persisted results (performed during Phase 12.9).
+
+---
+
+## Resolution status after Phase 13 (the optimization lab)
+
+This document is the Phase 12.9 **baseline** failure analysis (frozen reference). The
+following is the outcome of each case after the Phase 13 experiments (evidence in
+`evaluation/metrics/comparison.md`). It is informational — the baseline analysis above is
+unchanged.
+
+- **Q07 (referral timing, baseline rank 9):** 800/100 kept it at rank 9; hybrid moved it to
+  rank 3; the cross-encoder moved it to **rank 1**. Resolved by hybrid + reranking.
+- **Q11 (ethosuximide / absence seizures, baseline rank 4):** 800/100 fixed it (ranks 1–2);
+  the cross-encoder then **regressed it to rank 4** by over-ranking the "…with other seizure
+  types" distractor (5.3.4) to rank 1 — the only known reranking regression, a
+  lexical-overlap / domain-nuance failure. It did **not** reproduce on the holdout.
+- **Q18 (monitoring in pregnancy, baseline rank 4):** 800/100 improved to rank 2; hybrid
+  regressed it (fusion); the cross-encoder restored it to **rank 1**. Resolved.
+- **Q09 (MRI within 6 weeks):** dense-only never retrieved any relevant chunk; BM25 found 2
+  (the only configuration to do so); the cross-encoder promoted one to **rank 3**. This is
+  the strongest argument for the hybrid + rerank pipeline.
+- **Q20 (deliberate negative):** no relevant chunk in any candidate pool under any
+  configuration — correct behavior, NOT a retrieval failure.
+- **Holdout (H26, H27):** the two deliberate negatives of the 27-question holdout also have
+  zero relevant in the candidate pool — correct unanswerable behavior.
+
+### Post-optimization failure classes (unchanged classes, changed frequencies)
+
+- Chunk-boundary / context fragmentation: **largely resolved** by 800/100 (+ overlap where
+  tested); no longer the dominant class.
+- Lexically similar distractors: reduced but not eliminated (Q11 remains the reranker-era
+  example).
+- Semantic paraphrase not matched: reduced by the cross-encoder (Q18 fixed); the
+  cross-encoder itself can over-weight lexical overlap (Q11).
+- Ranking weakness within the pool: the cross-encoder is now the primary countermeasure;
+  residual issue is **Top-3 precision density** (relevant chunks spread across top-3 slots
+  rather than concentrated), which is optimization, not a blocker.
+
+### Current architecture (frozen for now)
+
+```text
+800/100 + MiniLM + Dense Top-20 + BM25 Top-20 + cross-encoder → Top-10
+```
+
+Benchmark P@3 0.5167 · holdout P@3 0.5802 · answerable candidate recall 19/19 and 25/25.

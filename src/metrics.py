@@ -8,7 +8,7 @@ def validate_labeled(records):
     """Validate a labeled results set; raise ValueError with a clear message.
 
     Checks:
-    - all 20 question IDs present, each with exactly ranks 1..10
+    - every question ID present, each with exactly ranks 1..10
     - no duplicate (question_id, rank) pairs
     - no null relevance labels (null is NOT treated as not_relevant)
     """
@@ -36,11 +36,6 @@ def validate_labeled(records):
         seen[key] = True
 
     qids = {r["question_id"] for r in records}
-    if len(qids) != 20:
-        raise ValueError(
-            f"expected 20 questions, found {len(qids)}: {sorted(qids)}"
-        )
-
     for qid in qids:
         ranks = sorted(r["rank"] for r in records if r["question_id"] == qid)
         if ranks != list(range(1, 11)):

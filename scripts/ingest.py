@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.chunking import chunk_documents
 from src.config import PDF_DIR
+from src.embeddings import DEFAULT_EMBEDDING_MODEL
 from src.ingestion import load_pdfs
 from src.vectorstore import add_documents
 
@@ -43,15 +44,23 @@ def main():
             "store untouched."
         ),
     )
+    parser.add_argument(
+        "--embedding",
+        default=DEFAULT_EMBEDDING_MODEL,
+        help=(
+            f"Sentence-transformer model name (default: {DEFAULT_EMBEDDING_MODEL}). "
+            "Use the same model when querying this store."
+        ),
+    )
     args = parser.parse_args()
 
     documents = load_pdfs(PDF_DIR)
     print(f"{len(documents)} pages loaded")
     chunks = chunk_documents(documents, chunk_size=args.chunk_size, chunk_overlap=args.chunk_overlap)
     print(f"{len(chunks)} chunks created")
-    add_documents(chunks, persist_dir=args.persist_dir)
+    add_documents(chunks, persist_dir=args.persist_dir, model_name=args.embedding)
     target = args.persist_dir or "data/chroma_db (baseline)"
-    print(f"indexed into Chroma ({target})")
+    print(f"indexed into Chroma ({target}) with embedding {args.embedding}")
 
 
 if __name__ == "__main__":

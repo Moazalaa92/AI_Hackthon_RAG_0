@@ -6,27 +6,28 @@ from pathlib import Path
 from langchain_chroma import Chroma
 
 from src.config import EVAL_TOP_K
-from src.embeddings import get_embeddings
+from src.embeddings import DEFAULT_EMBEDDING_MODEL, get_embeddings
 
 
-def _get_vectorstore(persist_dir):
+def _get_vectorstore(persist_dir, model_name=DEFAULT_EMBEDDING_MODEL):
     """Chroma store for a given persist directory (mirrors src.vectorstore)."""
     return Chroma(
         collection_name="documents",
         persist_directory=str(persist_dir),
-        embedding_function=get_embeddings(),
+        embedding_function=get_embeddings(model_name),
     )
 
 
-def run_retrieval(dataset, persist_dir, top_k=EVAL_TOP_K):
+def run_retrieval(dataset, persist_dir, top_k=EVAL_TOP_K, model_name=DEFAULT_EMBEDDING_MODEL):
     """Run retrieval for every dataset question; return one record per chunk.
 
     Each record follows the schema frozen in Phase 12.3. `score` is the raw
     L2 distance from `similarity_search_with_score` (lower = more similar);
     rank 1 always has the smallest score. `relevant` starts as `null` and is
-    set by manual labeling (12.5).
+    set by manual labeling (12.5). `model_name` must match the model used to
+    build the store being queried.
     """
-    vectorstore = _get_vectorstore(persist_dir)
+    vectorstore = _get_vectorstore(persist_dir, model_name=model_name)
     records = []
     for question in dataset["questions"]:
         hits = vectorstore.similarity_search_with_score(question["question"], k=top_k)

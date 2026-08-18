@@ -1,0 +1,177 @@
+{
+  "experiment": "holdout_v1_candidate_recall",
+  "description": "Candidate recall of union pool (dense top-20 U bm25 top-20) for holdout questions, from labeled holdout_v1_hybrid_candidates_labeled.jsonl (858/858 labeled).",
+  "deliberate_negatives": [
+    "H26",
+    "H27"
+  ],
+  "questions_answerable": 25,
+  "questions_with_relevant_in_union_pool": 25,
+  "candidate_recall_answerable": 1.0,
+  "total_relevant_in_pool": 98,
+  "pool_size": 858,
+  "per_question": {
+    "H01": {
+      "relevant_in_pool": 5,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 5,
+      "pool_size": 28
+    },
+    "H02": {
+      "relevant_in_pool": 1,
+      "relevant_in_dense20": 1,
+      "relevant_in_bm25_20": 1,
+      "pool_size": 36
+    },
+    "H03": {
+      "relevant_in_pool": 2,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 2,
+      "pool_size": 30
+    },
+    "H04": {
+      "relevant_in_pool": 4,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 30
+    },
+    "H05": {
+      "relevant_in_pool": 2,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 2,
+      "pool_size": 31
+    },
+    "H06": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 3,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 31
+    },
+    "H07": {
+      "relevant_in_pool": 12,
+      "relevant_in_dense20": 9,
+      "relevant_in_bm25_20": 11,
+      "pool_size": 28
+    },
+    "H08": {
+      "relevant_in_pool": 5,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 34
+    },
+    "H09": {
+      "relevant_in_pool": 4,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 33
+    },
+    "H10": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 2,
+      "pool_size": 37
+    },
+    "H11": {
+      "relevant_in_pool": 1,
+      "relevant_in_dense20": 1,
+      "relevant_in_bm25_20": 1,
+      "pool_size": 33
+    },
+    "H12": {
+      "relevant_in_pool": 1,
+      "relevant_in_dense20": 1,
+      "relevant_in_bm25_20": 1,
+      "pool_size": 34
+    },
+    "H13": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 1,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 34
+    },
+    "H14": {
+      "relevant_in_pool": 5,
+      "relevant_in_dense20": 5,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 35
+    },
+    "H15": {
+      "relevant_in_pool": 2,
+      "relevant_in_dense20": 1,
+      "relevant_in_bm25_20": 2,
+      "pool_size": 31
+    },
+    "H16": {
+      "relevant_in_pool": 5,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 33
+    },
+    "H17": {
+      "relevant_in_pool": 4,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 27
+    },
+    "H18": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 3,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 31
+    },
+    "H19": {
+      "relevant_in_pool": 4,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 28
+    },
+    "H20": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 33
+    },
+    "H21": {
+      "relevant_in_pool": 4,
+      "relevant_in_dense20": 3,
+      "relevant_in_bm25_20": 4,
+      "pool_size": 29
+    },
+    "H22": {
+      "relevant_in_pool": 3,
+      "relevant_in_dense20": 2,
+      "relevant_in_bm25_20": 3,
+      "pool_size": 32
+    },
+    "H23": {
+      "relevant_in_pool": 6,
+      "relevant_in_dense20": 4,
+      "relevant_in_bm25_20": 6,
+      "pool_size": 26
+    },
+    "H24": {
+      "relevant_in_pool": 7,
+      "relevant_in_dense20": 7,
+      "relevant_in_bm25_20": 5,
+      "pool_size": 31
+    },
+    "H25": {
+      "relevant_in_pool": 6,
+      "relevant_in_dense20": 6,
+      "relevant_in_bm25_20": 6,
+      "pool_size": 32
+    },
+    "H26": {
+      "relevant_in_pool": 0,
+      "relevant_in_dense20": 0,
+      "relevant_in_bm25_20": 0,
+      "pool_size": 34
+    },
+    "H27": {
+      "relevant_in_pool": 0,
+      "relevant_in_dense20": 0,
+      "relevant_in_bm25_20": 0,
+      "pool_size": 37
+    }
+  }
+}

@@ -1,0 +1,508 @@
+{
+  "experiment": "reranked_hybrid_800_100",
+  "per_question": {
+    "Q01": {
+      "question_id": "Q01",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 1,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.1,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q02": {
+      "question_id": "Q02",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 1,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.1,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q03": {
+      "question_id": "Q03",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 3,
+      "relevant_count_at_5": 3,
+      "relevant_count_at_10": 3,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.3,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q04": {
+      "question_id": "Q04",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 2,
+      "relevant_count_at_5": 2,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.4,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q05": {
+      "question_id": "Q05",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 2,
+      "relevant_count_at_5": 2,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.4,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q06": {
+      "question_id": "Q06",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 2,
+      "relevant_count_at_5": 3,
+      "relevant_count_at_10": 3,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.3,
+      "ranks_4_5_relevance": [
+        "relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q07": {
+      "question_id": "Q07",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 1,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.1,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q08": {
+      "question_id": "Q08",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 3,
+      "relevant_count_at_10": 3,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.3,
+      "ranks_4_5_relevance": [
+        "relevant",
+        "relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q09": {
+      "question_id": "Q09",
+      "first_relevant_rank": 3,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "relevant"
+      ]
+    },
+    "Q10": {
+      "question_id": "Q10",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 3,
+      "relevant_count_at_5": 3,
+      "relevant_count_at_10": 4,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.4,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q11": {
+      "question_id": "Q11",
+      "first_relevant_rank": 4,
+      "relevant_count_at_3": 0,
+      "relevant_count_at_5": 2,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": false,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.0,
+      "precision_at_5": 0.4,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "relevant",
+        "relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q12": {
+      "question_id": "Q12",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 2,
+      "relevant_count_at_5": 3,
+      "relevant_count_at_10": 3,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.3,
+      "ranks_4_5_relevance": [
+        "relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q13": {
+      "question_id": "Q13",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 2,
+      "relevant_count_at_5": 2,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.6666666666666666,
+      "precision_at_5": 0.4,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q14": {
+      "question_id": "Q14",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q15": {
+      "question_id": "Q15",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 3,
+      "relevant_count_at_5": 5,
+      "relevant_count_at_10": 6,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 1.0,
+      "precision_at_5": 1.0,
+      "precision_at_10": 0.6,
+      "ranks_4_5_relevance": [
+        "relevant",
+        "relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q16": {
+      "question_id": "Q16",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 3,
+      "relevant_count_at_5": 4,
+      "relevant_count_at_10": 5,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 1.0,
+      "precision_at_5": 0.8,
+      "precision_at_10": 0.5,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q17": {
+      "question_id": "Q17",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 1,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.1,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q18": {
+      "question_id": "Q18",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 2,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.2,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "relevant"
+      ]
+    },
+    "Q19": {
+      "question_id": "Q19",
+      "first_relevant_rank": 1,
+      "relevant_count_at_3": 1,
+      "relevant_count_at_5": 1,
+      "relevant_count_at_10": 1,
+      "has_relevant_at_3": true,
+      "has_relevant_at_5": true,
+      "has_relevant_at_10": true,
+      "precision_at_3": 0.3333333333333333,
+      "precision_at_5": 0.2,
+      "precision_at_10": 0.1,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    },
+    "Q20": {
+      "question_id": "Q20",
+      "first_relevant_rank": null,
+      "relevant_count_at_3": 0,
+      "relevant_count_at_5": 0,
+      "relevant_count_at_10": 0,
+      "has_relevant_at_3": false,
+      "has_relevant_at_5": false,
+      "has_relevant_at_10": false,
+      "precision_at_3": 0.0,
+      "precision_at_5": 0.0,
+      "precision_at_10": 0.0,
+      "ranks_4_5_relevance": [
+        "not_relevant",
+        "not_relevant"
+      ],
+      "ranks_6_10_relevance": [
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant",
+        "not_relevant"
+      ]
+    }
+  },
+  "aggregates": {
+    "questions_with_relevant_at_3": 18,
+    "questions_with_relevant_at_5": 19,
+    "questions_with_relevant_at_10": 19,
+    "pct_with_relevant_at_3": 0.9,
+    "pct_with_relevant_at_5": 0.95,
+    "pct_with_relevant_at_10": 0.95,
+    "questions_with_no_relevant_at_10": 1,
+    "first_relevant_rank_distribution": {
+      "1": 17,
+      "2": 0,
+      "3": 1,
+      "4": 1,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "none": 1
+    }
+  },
+  "caveat": "LLM-judged retrieval relevance (deepseek/deepseek-v4-flash, temp 0). These are NOT clinical ground truth; they are a proxy for retrieval quality."
+}

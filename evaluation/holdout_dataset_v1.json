@@ -1,0 +1,196 @@
+{
+  "dataset_version": "holdout_v1",
+  "created": "2026-08-18",
+  "description": "Held-out retrieval evaluation questions for Project_pdf.pdf (NICE NG217 epilepsy guideline). Independent of evaluation/dataset.json: covers guideline sections and information needs NOT in the original 20-question benchmark. Created from the guideline structure, not from retrieval outputs.",
+  "questions": [
+    {
+      "id": "H01",
+      "question": "What should the initial assessment of an adult after a first suspected seizure include?",
+      "category": "referral_assessment",
+      "expected_pages": [],
+      "notes": "See recommendation 1.1.4 (assessment after a first suspected seizure in adults)."
+    },
+    {
+      "id": "H02",
+      "question": "How does the guideline define a complicated febrile seizure in children?",
+      "category": "definition",
+      "expected_pages": [],
+      "notes": "See recommendation 1.1.6 (febrile seizures lasting longer than 10 minutes or with additional features)."
+    },
+    {
+      "id": "H03",
+      "question": "Why is a 12-lead ECG recommended for people after a first suspected seizure?",
+      "category": "diagnosis",
+      "expected_pages": [],
+      "notes": "See recommendation 1.2.2 (12-lead ECG to help identify cardiac causes)."
+    },
+    {
+      "id": "H04",
+      "question": "When should a CT scan be considered instead of an MRI for a person with epilepsy?",
+      "category": "diagnosis",
+      "expected_pages": [],
+      "notes": "See recommendation 1.3.2 (if MRI is contraindicated)."
+    },
+    {
+      "id": "H05",
+      "question": "Who should report the MRI scan of a person with epilepsy?",
+      "category": "diagnosis",
+      "expected_pages": [],
+      "notes": "See recommendation 1.3.4 (radiologist with expertise in epilepsy imaging)."
+    },
+    {
+      "id": "H06",
+      "question": "When should antibody testing be considered in people with suspected epilepsy?",
+      "category": "diagnosis",
+      "expected_pages": [],
+      "notes": "See recommendation 1.5.1 (antibody testing in discussion with a neurologist)."
+    },
+    {
+      "id": "H07",
+      "question": "How should information and support be provided to people with epilepsy and their families or carers?",
+      "category": "information_support",
+      "expected_pages": [],
+      "notes": "See section 2.1 (recommendations 2.1.1-2.1.11, information and support)."
+    },
+    {
+      "id": "H08",
+      "question": "What does the guideline say about access to tertiary epilepsy services for adults with suspected or confirmed epilepsy?",
+      "category": "referral",
+      "expected_pages": [],
+      "notes": "See recommendations 3.1.1-3.1.3 (access to tertiary epilepsy services via the specialist)."
+    },
+    {
+      "id": "H09",
+      "question": "What type of treatment strategy does the guideline recommend when starting antiseizure medication?",
+      "category": "treatment_principle",
+      "expected_pages": [],
+      "notes": "See recommendation 4.1.1 (individualised antiseizure medication treatment strategy)."
+    },
+    {
+      "id": "H10",
+      "question": "What is the recommended approach to whether one or more antiseizure medications should be used to treat epilepsy?",
+      "category": "treatment_principle",
+      "expected_pages": [],
+      "notes": "See recommendation 4.1.3 (use a single antiseizure medication / monotherapy)."
+    },
+    {
+      "id": "H11",
+      "question": "When should antiseizure medication be started after a diagnosis of epilepsy?",
+      "category": "management",
+      "expected_pages": [],
+      "notes": "See recommendation 4.2.1 (start once the diagnosis of epilepsy is confirmed)."
+    },
+    {
+      "id": "H12",
+      "question": "What MHRA safety advice should be followed when switching between different manufacturers' versions of an antiseizure medication?",
+      "category": "medication_safety",
+      "expected_pages": [],
+      "notes": "See recommendation 4.3.1 (MHRA safety advice on switching between manufacturers' products)."
+    },
+    {
+      "id": "H13",
+      "question": "Which antiseizure medication is associated with an increased risk of serious skin reactions in people of Han Chinese or Thai family background?",
+      "category": "medication_safety",
+      "expected_pages": [],
+      "notes": "See recommendation 4.3.2 (phenytoin)."
+    },
+    {
+      "id": "H14",
+      "question": "Which medicines with a similar chemical structure to carbamazepine are associated with an increased risk of serious skin reactions?",
+      "category": "medication_safety",
+      "expected_pages": [],
+      "notes": "See recommendation 4.3.3 (oxcarbazepine, eslicarbazepine acetate)."
+    },
+    {
+      "id": "H15",
+      "question": "Which medicines are offered as first-line treatment for myoclonic seizures?",
+      "category": "treatment",
+      "expected_pages": [],
+      "notes": "See recommendation 5.4.2 (levetiracetam or sodium valproate)."
+    },
+    {
+      "id": "H16",
+      "question": "Which medicines are offered as first-line treatment for tonic or atonic seizures?",
+      "category": "treatment",
+      "expected_pages": [],
+      "notes": "See recommendation 5.5.2 (lamotrigine or sodium valproate)."
+    },
+    {
+      "id": "H17",
+      "question": "What does the guideline recommend about starting treatment for self-limited epilepsy with centrotemporal spikes?",
+      "category": "treatment_syndrome",
+      "expected_pages": [],
+      "notes": "See recommendation 6.4.1 (discuss starting treatment with children and young people)."
+    },
+    {
+      "id": "H18",
+      "question": "Which medicines are recommended as first-line treatment for epilepsy with myoclonic-atonic seizures (Doose syndrome)?",
+      "category": "treatment_syndrome",
+      "expected_pages": [],
+      "notes": "See recommendation 6.5.2 (levetiracetam or sodium valproate)."
+    },
+    {
+      "id": "H19",
+      "question": "What initial emergency treatment is recommended for a person in convulsive status epilepticus?",
+      "category": "emergency",
+      "expected_pages": [],
+      "notes": "See section 7.1 (resuscitation and immediate emergency treatment; benzodiazepine first-line)."
+    },
+    {
+      "id": "H20",
+      "question": "How should repeated or cluster seizures be managed?",
+      "category": "management",
+      "expected_pages": [],
+      "notes": "See recommendation 7.2.1 (repeated or cluster seizures - typically 3 or more self-terminating seizures in 24 hours)."
+    },
+    {
+      "id": "H21",
+      "question": "In which children might a ketogenic diet be considered for the treatment of epilepsy?",
+      "category": "non_pharmacological",
+      "expected_pages": [],
+      "notes": "See recommendation 8.1.1 (childhood-onset epilepsy syndromes such as GLUT1 deficiency syndrome, under tertiary epilepsy specialist guidance)."
+    },
+    {
+      "id": "H22",
+      "question": "With whom should the option of assessment for resective epilepsy surgery be discussed?",
+      "category": "surgical_treatment",
+      "expected_pages": [],
+      "notes": "See recommendation 8.2.1 (people with drug-resistant epilepsy and their families/carers)."
+    },
+    {
+      "id": "H23",
+      "question": "What interventions does the guideline recommend to reduce the risk of epilepsy-related death, including SUDEP?",
+      "category": "prognosis_risk",
+      "expected_pages": [],
+      "notes": "See section 10.2 (discuss risk, agree ways to reduce it, support medication adherence, night monitors for high-risk people)."
+    },
+    {
+      "id": "H24",
+      "question": "What is the role of epilepsy specialist nurses in the care of people with epilepsy?",
+      "category": "service_provision",
+      "expected_pages": [],
+      "notes": "See recommendation 11.1.1 (access to an epilepsy specialist nurse with a central role in information, education and support)."
+    },
+    {
+      "id": "H25",
+      "question": "What should happen when a young person moves from children's to adults' epilepsy services?",
+      "category": "service_provision",
+      "expected_pages": [],
+      "notes": "See section 11.2 (transition from children's to adults' epilepsy services)."
+    },
+    {
+      "id": "H26",
+      "question": "What is the recommended starting dose of ethosuximide for a child with absence seizures?",
+      "category": "not_answerable",
+      "expected_pages": [],
+      "notes": "Deliberate negative case. The guideline recommends ethosuximide as a treatment option but defers dosing to the BNF; no dosing information is present in the guideline."
+    },
+    {
+      "id": "H27",
+      "question": "What is the monthly cost of lamotrigine for an adult in the UK?",
+      "category": "not_answerable",
+      "expected_pages": [],
+      "notes": "Deliberate negative case. No drug cost information is present in the guideline."
+    }
+  ]
+}

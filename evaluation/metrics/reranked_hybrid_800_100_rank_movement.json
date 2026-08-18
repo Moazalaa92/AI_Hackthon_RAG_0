@@ -1,0 +1,392 @@
+{
+  "experiment": "reranked_hybrid_800_100",
+  "per_question": {
+    "Q01": [
+      {
+        "document_id": "chunk_412",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      }
+    ],
+    "Q02": [
+      {
+        "document_id": "chunk_211",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      }
+    ],
+    "Q03": [
+      {
+        "document_id": "chunk_45",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_39",
+        "fusion_rank": 4,
+        "reranked_rank": 2,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_47",
+        "fusion_rank": 5,
+        "reranked_rank": 3,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_40",
+        "fusion_rank": 6,
+        "reranked_rank": 7,
+        "movement": "worsened"
+      }
+    ],
+    "Q04": [
+      {
+        "document_id": "chunk_39",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_46",
+        "fusion_rank": 2,
+        "reranked_rank": 2,
+        "movement": "kept"
+      }
+    ],
+    "Q05": [
+      {
+        "document_id": "chunk_49",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_54",
+        "fusion_rank": 2,
+        "reranked_rank": 2,
+        "movement": "kept"
+      }
+    ],
+    "Q06": [
+      {
+        "document_id": "chunk_61",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_60",
+        "fusion_rank": 3,
+        "reranked_rank": 4,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_68",
+        "fusion_rank": 4,
+        "reranked_rank": 2,
+        "movement": "improved"
+      }
+    ],
+    "Q07": [
+      {
+        "document_id": "chunk_25",
+        "fusion_rank": 3,
+        "reranked_rank": 1,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_36",
+        "fusion_rank": 9,
+        "reranked_rank": 8,
+        "movement": "improved"
+      }
+    ],
+    "Q08": [
+      {
+        "document_id": "chunk_94",
+        "fusion_rank": 1,
+        "reranked_rank": 3,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_96",
+        "fusion_rank": 2,
+        "reranked_rank": 1,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_102",
+        "fusion_rank": 14,
+        "reranked_rank": 4,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_95",
+        "fusion_rank": 17,
+        "reranked_rank": 22,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_103",
+        "fusion_rank": 29,
+        "reranked_rank": 9,
+        "movement": "improved"
+      }
+    ],
+    "Q09": [
+      {
+        "document_id": "chunk_176",
+        "fusion_rank": 13,
+        "reranked_rank": 10,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_184",
+        "fusion_rank": 27,
+        "reranked_rank": 3,
+        "movement": "improved"
+      }
+    ],
+    "Q10": [
+      {
+        "document_id": "chunk_190",
+        "fusion_rank": 1,
+        "reranked_rank": 2,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_204",
+        "fusion_rank": 2,
+        "reranked_rank": 3,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_305",
+        "fusion_rank": 4,
+        "reranked_rank": 7,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_307",
+        "fusion_rank": 8,
+        "reranked_rank": 1,
+        "movement": "improved"
+      }
+    ],
+    "Q11": [
+      {
+        "document_id": "chunk_205",
+        "fusion_rank": 1,
+        "reranked_rank": 4,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_212",
+        "fusion_rank": 5,
+        "reranked_rank": 5,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_215",
+        "fusion_rank": 18,
+        "reranked_rank": 13,
+        "movement": "improved"
+      }
+    ],
+    "Q12": [
+      {
+        "document_id": "chunk_256",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_265",
+        "fusion_rank": 6,
+        "reranked_rank": 2,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_264",
+        "fusion_rank": 7,
+        "reranked_rank": 4,
+        "movement": "improved"
+      }
+    ],
+    "Q13": [
+      {
+        "document_id": "chunk_270",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_278",
+        "fusion_rank": 2,
+        "reranked_rank": 2,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_277",
+        "fusion_rank": 4,
+        "reranked_rank": 9,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_272",
+        "fusion_rank": 11,
+        "reranked_rank": 13,
+        "movement": "worsened"
+      }
+    ],
+    "Q14": [
+      {
+        "document_id": "chunk_286",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_288",
+        "fusion_rank": 10,
+        "reranked_rank": 17,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_293",
+        "fusion_rank": 13,
+        "reranked_rank": 9,
+        "movement": "improved"
+      }
+    ],
+    "Q15": [
+      {
+        "document_id": "chunk_175",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      },
+      {
+        "document_id": "chunk_278",
+        "fusion_rank": 3,
+        "reranked_rank": 6,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_19",
+        "fusion_rank": 4,
+        "reranked_rank": 2,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_265",
+        "fusion_rank": 5,
+        "reranked_rank": 4,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_441",
+        "fusion_rank": 6,
+        "reranked_rank": 3,
+        "movement": "improved"
+      }
+    ],
+    "Q16": [
+      {
+        "document_id": "chunk_138",
+        "fusion_rank": 2,
+        "reranked_rank": 12,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_20",
+        "fusion_rank": 3,
+        "reranked_rank": 5,
+        "movement": "worsened"
+      },
+      {
+        "document_id": "chunk_442",
+        "fusion_rank": 5,
+        "reranked_rank": 1,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_316",
+        "fusion_rank": 7,
+        "reranked_rank": 3,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_273",
+        "fusion_rank": 12,
+        "reranked_rank": 2,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_259",
+        "fusion_rank": 18,
+        "reranked_rank": 16,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_245",
+        "fusion_rank": 19,
+        "reranked_rank": 18,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_221",
+        "fusion_rank": 21,
+        "reranked_rank": 20,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_179",
+        "fusion_rank": 23,
+        "reranked_rank": 6,
+        "movement": "improved"
+      }
+    ],
+    "Q17": [
+      {
+        "document_id": "chunk_167",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      }
+    ],
+    "Q18": [
+      {
+        "document_id": "chunk_156",
+        "fusion_rank": 4,
+        "reranked_rank": 1,
+        "movement": "improved"
+      },
+      {
+        "document_id": "chunk_145",
+        "fusion_rank": 6,
+        "reranked_rank": 7,
+        "movement": "worsened"
+      }
+    ],
+    "Q19": [
+      {
+        "document_id": "chunk_376",
+        "fusion_rank": 1,
+        "reranked_rank": 1,
+        "movement": "kept"
+      }
+    ]
+  },
+  "aggregates": {
+    "improved": 26,
+    "kept": 16,
+    "worsened": 15
+  },
+  "relevant_chunks_in_top3_after_rerank": 32,
+  "caveat": "Relevant set = LLM-judged labels from the hybrid candidate pool (unchanged judge). Ranks compared: hybrid RRF fusion rank vs cross-encoder reranked rank, for chunks already in the pool."
+}

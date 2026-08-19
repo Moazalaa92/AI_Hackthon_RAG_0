@@ -275,12 +275,12 @@ The visual-page prior can also be swept over the frozen labeled chunk pools:
 Measured page retrieval results (PageHit@K / PageCoverage@K) are recorded in
 `evaluation/metrics/`:
 
-| Dataset / ground truth | Visual Hit@1 | Visual Hit@3 | Visual Hit@5 | Visual Hit@10 | Visual Coverage@3 | Visual Coverage@10 | Text Hit@3 | Text Hit@10 | Text Coverage@3 | Text Coverage@10 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Benchmark / annotated (n=19, 1 excluded) | 0.6842 | 0.8947 | 0.8947 | 0.9474 | 0.8684 | 0.9211 | 0.8947 | 1.0000 | 0.8684 | 1.0000 |
-| Benchmark / judged (n=19, 1 excluded) | 0.7368 | 0.9474 | 1.0000 | 1.0000 | 0.7216 | 0.8988 | 1.0000 | 1.0000 | 0.8035 | 0.9649 |
-| Holdout / annotated (n=0, 27 excluded) | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
-| Holdout / judged (n=25, 2 excluded) | 0.9200 | 1.0000 | 1.0000 | 1.0000 | 0.6610 | 0.8790 | 1.0000 | 1.0000 | 0.6910 | 0.9057 |
+| Dataset / ground truth | Visual Hit@1 | Visual Hit@3 | Visual Hit@5 | Visual Hit@10 | Visual Coverage@3 | Visual Coverage@10 | Text Hit@1 | Text Hit@3 | Text Hit@10 | Text Coverage@3 | Text Coverage@10 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Benchmark / annotated (n=19, 1 excluded) | 0.6842 | 0.8947 | 0.8947 | 0.9474 | 0.8684 | 0.9211 | 0.7368 | 0.8947 | 1.0000 | 0.8684 | 1.0000 |
+| Benchmark / judged (n=19, 1 excluded) | 0.7368 | 0.9474 | 1.0000 | 1.0000 | 0.7216 | 0.8988 | 0.8947 | 1.0000 | 1.0000 | 0.8035 | 0.9649 |
+| Holdout / annotated (n=0, 27 excluded) | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| Holdout / judged (n=25, 2 excluded) | 0.9200 | 1.0000 | 1.0000 | 1.0000 | 0.6610 | 0.8790 | 0.8800 | 1.0000 | 1.0000 | 0.6910 | 0.9057 |
 
 The visual-prior sweep reports P@3, P@5, Hit@3, MRR, and the pool ceiling for weights
 0, 0.1, 0.25, 0.5, and 1.0, plus visual-only ordering, in
@@ -311,8 +311,8 @@ This corpus is a deliberately difficult fit for visual retrieval: all **161 NG21
 are pure linear text**, with **0 embedded images**, **no real tables**, and a median of
 **1,694 extracted characters per page**. The frozen text pipeline already reaches
 **PageHit@3 = 0.8947** and **PageHit@10 = 1.0000**, so ColPali-style retrieval has little
-headroom here. The measured visual result is reported plainly, including if visual
-retrieval loses.
+headroom here. The one place the pixel path is ahead is first-page precision on holdout
+(PageHit@1 0.9200 vs 0.8800), on 25 questions — too small a margin to act on.
 
 ---
 

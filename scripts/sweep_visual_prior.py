@@ -50,8 +50,34 @@ def visual_scores(dataset, index):
     return output
 
 
-def run_pool(pool_path, index, dataset):
-    records = read_records(pool_path)
+def validate_pool_dataset(pool_path, records, dataset, parser):
+    """Reject pool/dataset question-set mismatches before scoring."""
+    dataset_ids = [question.get("id") for question in dataset.get("questions", [])]
+    if any(question_id is None for question_id in dataset_ids):
+        parser.error(f"{pool_path}: dataset contains a question without an id")
+    if len(dataset_ids) != len(set(dataset_ids)):
+        parser.error(f"{pool_path}: dataset contains duplicate question ids")
+
+    pool_ids = {record["question_id"] for record in records}
+    dataset_id_set = set(dataset_ids)
+    missing_from_dataset = sorted(pool_ids - dataset_id_set)
+    missing_from_pool = sorted(dataset_id_set - pool_ids)
+    if missing_from_dataset or missing_from_pool:
+        details = []
+        if missing_from_dataset:
+            details.append(
+                "question ids present in pool but absent from dataset: "
+                + ", ".join(missing_from_dataset)
+            )
+        if missing_from_pool:
+            details.append(
+                "question ids present in dataset but absent from pool: "
+                + ", ".join(missing_from_pool)
+            )
+        parser.error(f"{pool_path}: pool/dataset question-set mismatch; " + "; ".join(details))
+
+
+def run_pool(pool_path, index, dataset, records):
     by_question = group(records)
     ordered = ordered_records(by_question)
     ce_by_question = score_candidates(ordered, CROSS_ENCODER_MODEL)
@@ -104,6 +130,18 @@ def main():
     )
     args = parser.parse_args()
 
+    if len(args.pools) == 1:
+        if args.holdout_dataset:
+            parser.error("--holdout-dataset requires exactly two positional pools")
+    elif len(args.pools) == 2:
+        if not args.holdout_dataset:
+            parser.error("two positional pools require --holdout-dataset")
+    else:
+        parser.error(
+            "expected one pool with --dataset, or exactly two pools with "
+            "--dataset and --holdout-dataset"
+        )
+
     with open(args.dataset, encoding="utf-8") as handle:
         first_dataset = json.load(handle)
     second_dataset = first_dataset
@@ -111,11 +149,17 @@ def main():
         with open(args.holdout_dataset, encoding="utf-8") as handle:
             second_dataset = json.load(handle)
     datasets = [first_dataset, second_dataset]
+    pool_records = []
+    for pool_path, dataset in zip(args.pools, datasets):
+        records = read_records(pool_path)
+        validate_pool_dataset(pool_path, records, dataset, parser)
+        pool_records.append(records)
+
     index = load_index(args.index)
     summary = {}
-    for pool_path, dataset in zip(args.pools, datasets):
+    for pool_path, dataset, records in zip(args.pools, datasets, pool_records):
         print(f"Sweeping {pool_path}", flush=True)
-        summary[Path(pool_path).stem] = run_pool(pool_path, index, dataset)
+        summary[Path(pool_path).stem] = run_pool(pool_path, index, dataset, records)
     output_path = Path(args.out)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as handle:

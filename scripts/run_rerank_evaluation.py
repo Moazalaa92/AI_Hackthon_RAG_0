@@ -67,6 +67,24 @@ def main():
         help=f"Cross-encoder model name (default: {CROSS_ENCODER_MODEL})",
     )
     parser.add_argument(
+        "--models",
+        nargs="+",
+        default=None,
+        help=(
+            "Ensemble of cross-encoder model names; their per-question "
+            "z-standardized scores are averaged. Overrides --model."
+        ),
+    )
+    parser.add_argument(
+        "--bm25-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight of the z-standardized BM25 provenance score added to the "
+            "cross-encoder score (default: 0.0 = pure cross-encoder)"
+        ),
+    )
+    parser.add_argument(
         "--top-k",
         type=int,
         default=10,
@@ -75,7 +93,12 @@ def main():
     args = parser.parse_args()
 
     records = read_records(args.candidates)
-    reranked = rerank_candidates(records, model_name=args.model)
+    reranked = rerank_candidates(
+        records,
+        model_name=args.model,
+        model_names=args.models,
+        bm25_weight=args.bm25_weight,
+    )
 
     for r in reranked:
         r["score"] = r["reranker_score"]
@@ -88,7 +111,10 @@ def main():
     write_results(topk, topk_path)
     write_results(reranked, full_path)
 
-    print(f"Reranked {len(reranked)} candidate records with {args.model}")
+    used = " + ".join(args.models or [args.model])
+    if args.bm25_weight:
+        used += f" + {args.bm25_weight}*bm25"
+    print(f"Reranked {len(reranked)} candidate records with {used}")
     print(f"Wrote {len(topk)} final records to {topk_path}")
     print(f"Wrote {len(reranked)} reranked candidate records to {full_path}")
 

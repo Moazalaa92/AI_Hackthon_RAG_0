@@ -1,0 +1,143 @@
+{
+  "experiment": "holdout_v1_ensemble_hybrid",
+  "k": 5,
+  "mean_precision": 0.474074,
+  "per_question": {
+    "H01": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H02": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "H03": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "H04": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H05": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H06": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H07": {
+      "precision": 1.0,
+      "relevant": 5,
+      "n": 5
+    },
+    "H08": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H09": {
+      "precision": 0.8,
+      "relevant": 4,
+      "n": 5
+    },
+    "H10": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "H11": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "H12": {
+      "precision": 0.2,
+      "relevant": 1,
+      "n": 5
+    },
+    "H13": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H14": {
+      "precision": 0.8,
+      "relevant": 4,
+      "n": 5
+    },
+    "H15": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H16": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H17": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H18": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H19": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H20": {
+      "precision": 0.6,
+      "relevant": 3,
+      "n": 5
+    },
+    "H21": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H22": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H23": {
+      "precision": 0.4,
+      "relevant": 2,
+      "n": 5
+    },
+    "H24": {
+      "precision": 0.8,
+      "relevant": 4,
+      "n": 5
+    },
+    "H25": {
+      "precision": 1.0,
+      "relevant": 5,
+      "n": 5
+    },
+    "H26": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 5
+    },
+    "H27": {
+      "precision": 0.0,
+      "relevant": 0,
+      "n": 5
+    }
+  },
+  "caveat": "LLM-judged retrieval relevance (deepseek/deepseek-v4-flash, temp 0). These are NOT clinical ground truth; they are a proxy for retrieval quality."
+}

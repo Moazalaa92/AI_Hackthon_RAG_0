@@ -210,6 +210,110 @@ This differs from the rejected "Idea B — second lightweight ranking layer"
 comes from a **second cross-encoder** scoring the **full candidate union**, so chunks below
 rank 10 can still enter the Top-3; the BM25 term alone reproduces Idea B's null result.
 
+## Pixel RAG (visual page retrieval, opt-in)
+
+Pixel RAG is an additive experiment that renders each PDF page as an image and retrieves
+pages with ColSmol's multi-vector late-interaction MaxSim scorer. The extracted-text
+retrieval and ranking path above remains frozen. The visual dependencies are intentionally
+separate from `requirements.txt`:
+
+```bash
+python3 -m venv .venv-visual
+.venv-visual/bin/pip install -r requirements-visual.txt
+```
+
+Build the 150-DPI page index once. On the reference 2-vCPU CPU machine this takes
+approximately **44 minutes** and is resumable with a checkpoint every 20 pages:
+
+```bash
+.venv-visual/bin/python scripts/build_page_index.py \
+    --pdf data/pdfs/Project_pdf.pdf \
+    --dpi 150 \
+    --model vidore/colSmol-256M \
+    --out data/page_index/colsmol_150dpi.npz
+```
+
+Run the two page-retrieval evaluations:
+
+```bash
+.venv-visual/bin/python scripts/run_visual_evaluation.py \
+    --dataset evaluation/dataset.json \
+    --index data/page_index/colsmol_150dpi.npz \
+    --name visual_colsmol_benchmark
+.venv-visual/bin/python scripts/run_visual_evaluation.py \
+    --dataset evaluation/holdout_dataset_v1.json \
+    --index data/page_index/colsmol_150dpi.npz \
+    --name visual_colsmol_holdout
+```
+
+Page metrics are offline and use either annotated `expected_pages` or pages marked
+`relevant` in the existing labeled pools:
+
+```bash
+.venv-visual/bin/python scripts/page_metrics.py \
+    --input evaluation/results/visual_colsmol_benchmark_visual_pages.jsonl \
+    --dataset evaluation/dataset.json --ground-truth annotated \
+    --name visual_colsmol_benchmark_annotated
+.venv-visual/bin/python scripts/page_metrics.py \
+    --input evaluation/results/visual_colsmol_benchmark_visual_pages.jsonl \
+    --dataset evaluation/dataset.json --ground-truth judged \
+    --pool evaluation/results/hybrid_800_100_candidates_labeled.jsonl \
+    --name visual_colsmol_benchmark_judged
+```
+
+The visual-page prior can also be swept over the frozen labeled chunk pools:
+
+```bash
+.venv-visual/bin/python scripts/sweep_visual_prior.py \
+    evaluation/results/hybrid_800_100_candidates_labeled.jsonl \
+    evaluation/results/holdout_v1_hybrid_candidates_labeled.jsonl \
+    --dataset evaluation/dataset.json \
+    --holdout-dataset evaluation/holdout_dataset_v1.json \
+    --index data/page_index/colsmol_150dpi.npz
+```
+
+Measured page retrieval results (PageHit@K / PageCoverage@K) are recorded in
+`evaluation/metrics/`:
+
+| Dataset / ground truth | Visual Hit@1 | Visual Hit@3 | Visual Hit@5 | Visual Hit@10 | Visual Coverage@3 | Visual Coverage@10 | Text Hit@3 | Text Hit@10 | Text Coverage@3 | Text Coverage@10 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Benchmark / annotated (n=19, 1 excluded) | 0.6842 | 0.8947 | 0.8947 | 0.9474 | 0.8684 | 0.9211 | 0.8947 | 1.0000 | 0.8684 | 1.0000 |
+| Benchmark / judged (n=19, 1 excluded) | 0.7368 | 0.9474 | 1.0000 | 1.0000 | 0.7216 | 0.8988 | 1.0000 | 1.0000 | 0.8035 | 0.9649 |
+| Holdout / annotated (n=0, 27 excluded) | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| Holdout / judged (n=25, 2 excluded) | 0.9200 | 1.0000 | 1.0000 | 1.0000 | 0.6610 | 0.8790 | 1.0000 | 1.0000 | 0.6910 | 0.9057 |
+
+The visual-prior sweep reports P@3, P@5, Hit@3, MRR, and the pool ceiling for weights
+0, 0.1, 0.25, 0.5, and 1.0, plus visual-only ordering, in
+`evaluation/metrics/visual_prior_sweep.json`.
+
+| Dataset | Prior strategy | P@3 | P@5 | Hit@3 | MRR |
+|---|---|---:|---:|---:|---:|
+| Benchmark | visual only | 0.4667 | 0.3600 | 0.8500 | 0.7239 |
+| Benchmark | text CE + 0.0 visual | 0.5333 | 0.3900 | 0.9000 | 0.8792 |
+| Benchmark | text CE + 0.1 visual | 0.5333 | 0.3800 | 0.9000 | 0.8792 |
+| Benchmark | text CE + 0.25 visual | 0.5500 | 0.3800 | 0.9500 | 0.8833 |
+| Benchmark | text CE + 0.5 visual | 0.5167 | 0.3700 | 0.9500 | 0.8833 |
+| Benchmark | text CE + 1.0 visual | 0.5333 | 0.4000 | 0.9500 | 0.8833 |
+| Holdout | visual only | 0.4691 | 0.4074 | 0.8889 | 0.8426 |
+| Holdout | text CE + 0.0 visual | 0.5802 | 0.4519 | 0.9259 | 0.8704 |
+| Holdout | text CE + 0.1 visual | 0.5679 | 0.4667 | 0.9259 | 0.8704 |
+| Holdout | text CE + 0.25 visual | 0.5679 | 0.4815 | 0.9259 | 0.8704 |
+| Holdout | text CE + 0.5 visual | 0.5432 | 0.4815 | 0.9259 | 0.8889 |
+| Holdout | text CE + 1.0 visual | 0.5556 | 0.4815 | 0.9259 | 0.8889 |
+
+The labeled-pool ceilings are P@3=0.7333 / P@5=0.5300 on the benchmark and
+P@3=0.8148 / P@5=0.6444 on holdout. Visual-only retrieval loses substantially to
+the text cross-encoder. Adding the visual prior does not improve benchmark P@3
+over text-only, and lowers holdout P@3 at every nonzero weight; it raises P@5 on
+holdout at weights 0.1–1.0 but does not justify changing the frozen path.
+
+This corpus is a deliberately difficult fit for visual retrieval: all **161 NG217 pages
+are pure linear text**, with **0 embedded images**, **no real tables**, and a median of
+**1,694 extracted characters per page**. The frozen text pipeline already reaches
+**PageHit@3 = 0.8947** and **PageHit@10 = 1.0000**, so ColPali-style retrieval has little
+headroom here. The measured visual result is reported plainly, including if visual
+retrieval loses.
+
 ---
 
 ## Retrieval investigation — an engineering story
@@ -547,6 +651,7 @@ hackathon_lectures/
 ├── README.md                 ← this file
 ├── PLAN.md                   ← full plan: phase status, architecture, deviations
 ├── requirements.txt          ← pinned dependencies
+├── requirements-visual.txt   ← opt-in Pixel RAG dependencies
 ├── .env.example              ← config template (copy to .env)
 ├── app.py                    ← legacy demo (no LLM) — NOT canonical
 │
@@ -570,7 +675,9 @@ hackathon_lectures/
 │   ├── pipeline.py           ← query() → Answer (Phase 10 orchestration)
 │   ├── evaluation.py         ← run fixed dataset retrieval → JSONL
 │   ├── metrics.py            ← Precision@K, Hit@K, Top-K analysis
-│   └── judge.py              ← LLM relevance judge (retrieval labels)
+│   ├── judge.py              ← LLM relevance judge (retrieval labels)
+│   ├── page_images.py        ← deterministic PDF page rendering
+│   └── visual_retrieval.py   ← opt-in ColSmol page retrieval
 │
 ├── scripts/                  ← command-line tools
 │   ├── ask.py                ← single-question end-to-end CLI (Phase 8)
@@ -581,6 +688,8 @@ hackathon_lectures/
 │   ├── run_hybrid_evaluation.py ← dense+BM25 candidate pool
 │   ├── run_rerank_evaluation.py ← cross-encoder rerank → final Top-10
 │   ├── sweep_rankers.py      ← offline ranker comparison over labeled pools (no LLM)
+│   ├── build_page_index.py / run_visual_evaluation.py ← Pixel RAG CLIs
+│   ├── page_metrics.py / sweep_visual_prior.py ← offline visual metrics
 │   ├── label_results.py      ← LLM-judge labels for a results JSONL
 │   ├── apply_pool_labels.py  ← reuse pool labels for a reordering experiment (no LLM)
 │   ├── metrics.py / analyze_topk.py / candidate_recall_analysis.py / rerank_analysis.py

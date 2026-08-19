@@ -1,0 +1,8 @@
+# Optional dependencies used only by the Pixel RAG visual retrieval path.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.10.0+cpu
+torchvision==0.25.0+cpu
+colpali-engine==0.3.17
+PyMuPDF==1.28.2
+transformers==5.15.1
+peft==0.19.1

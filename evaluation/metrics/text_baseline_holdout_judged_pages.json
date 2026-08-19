@@ -1,0 +1,18 @@
+{
+  "name": "text_baseline_holdout_judged",
+  "input": "evaluation/results/holdout_v1_reranked_hybrid_top10.jsonl",
+  "dataset": "evaluation/holdout_dataset_v1.json",
+  "ground_truth": "judged",
+  "n_questions": 25,
+  "excluded_empty_ground_truth": 2,
+  "metrics": {
+    "PageHit@1": 0.88,
+    "PageCoverage@1": 0.35899999999999993,
+    "PageHit@3": 1.0,
+    "PageCoverage@3": 0.6909999999999998,
+    "PageHit@5": 1.0,
+    "PageCoverage@5": 0.8049999999999998,
+    "PageHit@10": 1.0,
+    "PageCoverage@10": 0.9056666666666666
+  }
+}

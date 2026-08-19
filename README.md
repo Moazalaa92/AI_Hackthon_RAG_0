@@ -166,6 +166,50 @@ occasionally a distractor outranks it just below the top.
 > holdout P@3 is **not** a system improvement; it is the *same frozen architecture* on a
 > different dataset, confirming the design generalizes.
 
+### Ranking optimization (opt-in, Phase 13.1)
+
+The final ranking stage was swept offline over the **already-labeled** candidate pools
+(`scripts/sweep_rankers.py`, no judge calls, candidate generation unchanged). All numbers
+below use the candidate-pool labels for every strategy, so they are directly comparable to
+each other (the single-model row is 0.5333 here vs 0.5167 in the frozen artifact purely
+because of judge label variance between runs).
+
+| Ranker | Benchmark P@3 | Holdout P@3 |
+|---|---:|---:|
+| RRF (no reranker) | 0.4167 | 0.5062 |
+| `ms-marco-MiniLM-L-6-v2` (default) | 0.5333 | 0.5802 |
+| `BAAI/bge-reranker-v2-m3` | 0.5500 | 0.5679 |
+| **ensemble(L-6 + bge-v2-m3) + 0.1·BM25** | **0.5833** | **0.5926** |
+| Achievable ceiling given the labels | 0.7333 | 0.8148 |
+
+The ensemble averages the two cross-encoders' **per-question z-standardized** scores (raw
+cross-encoder logits are on incomparable scales) and adds a small z-standardized BM25 term.
+It is **opt-in**, not the default: the gain is +0.05 / +0.01 P@3 on 20 / 27 questions and
+the bootstrap 95% CI includes zero on both sets, so it is the best observed configuration,
+not a proven one. Run it with:
+
+```bash
+python scripts/run_rerank_evaluation.py \
+  --candidates evaluation/results/hybrid_800_100_candidates.jsonl \
+  --name ensemble_hybrid_800_100 \
+  --models cross-encoder/ms-marco-MiniLM-L-6-v2 BAAI/bge-reranker-v2-m3 \
+  --bm25-weight 0.1
+```
+
+**A mean P@3 of 0.85 is unreachable on these datasets.** P@3 divides by 3 regardless of how
+much relevant evidence exists: 4 benchmark questions have a single relevant chunk in the
+entire labeled pool (P@3 ≤ 0.333 each) and Q20 is a deliberate unanswerable question scored
+0. A perfect ranker therefore scores 0.7333 on the benchmark and 0.8148 on the holdout.
+Raising that ceiling requires changing candidate generation and re-judging the pool, not
+tuning the ranker — Hit@3 (0.95 / 0.9259) and candidate recall (100%) are the metrics that
+are actually near saturation.
+
+This differs from the rejected "Idea B — second lightweight ranking layer"
+(`evaluation/experiments/adaptive_context_vs_second_ranker/REPORT.md`), which reordered the
+**frozen Top-10** from a **single** cross-encoder with a secondary signal. The gain here
+comes from a **second cross-encoder** scoring the **full candidate union**, so chunks below
+rank 10 can still enter the Top-3; the BM25 term alone reproduces Idea B's null result.
+
 ---
 
 ## Retrieval investigation — an engineering story
@@ -536,7 +580,9 @@ hackathon_lectures/
 │   ├── run_evaluation.py     ← dense-only Top-K on the eval dataset
 │   ├── run_hybrid_evaluation.py ← dense+BM25 candidate pool
 │   ├── run_rerank_evaluation.py ← cross-encoder rerank → final Top-10
+│   ├── sweep_rankers.py      ← offline ranker comparison over labeled pools (no LLM)
 │   ├── label_results.py      ← LLM-judge labels for a results JSONL
+│   ├── apply_pool_labels.py  ← reuse pool labels for a reordering experiment (no LLM)
 │   ├── metrics.py / analyze_topk.py / candidate_recall_analysis.py / rerank_analysis.py
 │   ├── ingest.py / retrieve.py / embed_demo.py
 │   └── inspect_*.py          ← inspect documents / chunks / vectors / results

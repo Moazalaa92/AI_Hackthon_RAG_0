@@ -3,4 +3,6 @@ __pycache__/
 .env
 data/extracted/
 data/chroma_db/experiments/
+data/page_images/
+data/page_index/
 .aider*

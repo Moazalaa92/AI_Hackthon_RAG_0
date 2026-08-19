@@ -1,0 +1,18 @@
+{
+  "name": "visual_colsmol_benchmark_judged",
+  "input": "evaluation/results/visual_colsmol_benchmark_visual_pages.jsonl",
+  "dataset": "evaluation/dataset.json",
+  "ground_truth": "judged",
+  "n_questions": 19,
+  "excluded_empty_ground_truth": 1,
+  "metrics": {
+    "PageHit@1": 0.7368421052631579,
+    "PageCoverage@1": 0.3789473684210526,
+    "PageHit@3": 0.9473684210526315,
+    "PageCoverage@3": 0.7216374269005847,
+    "PageHit@5": 1.0,
+    "PageCoverage@5": 0.8415204678362572,
+    "PageHit@10": 1.0,
+    "PageCoverage@10": 0.8988304093567252
+  }
+}

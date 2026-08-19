@@ -15,31 +15,41 @@ Before we plan, here is what already exists in this folder:
 | File / folder      | What it is                                                      | Plan status                       |
 | ------------------ | --------------------------------------------------------------- | --------------------------------- |
 | `.env`             | LLM API key + base URL + model (OpenRouter / deepseek)          | Keep — we adapt the plan to it    |
-| `requirements.txt` | `python-dotenv`, `pypdf`, `langchain`, `langchain-community`, `langchain-text-splitters`, `langchain-huggingface`, `sentence-transformers`, `langchain-chroma`, `chromadb`, `langchain-openai`, `gradio`, `rank_bm25` | Phases 3–13 deps installed (`rank_bm25` added for hybrid retrieval, Phase 13) |
+| `requirements.txt` | `python-dotenv`, `pypdf`, `langchain`, `langchain-community`, `langchain-text-splitters`, `langchain-huggingface`, `sentence-transformers`, `langchain-chroma`, `chromadb`, `langchain-openai`, `gradio`, `rank_bm25` | Phases 3–16 deps installed (`rank_bm25` added for hybrid retrieval, Phase 16) |
 | `data/pdfs/`       | `Project_pdf.pdf` — a NICE epilepsy guideline (NG217, 161 pages) | Use as the baseline test PDF      |
 | `data/chroma_db/`  | Persisted Chroma store, collection `documents`, **L2 distance space** | Baseline store (rebuildable)      |
 | `.venv/`           | Virtual environment                                             | Keep using it                     |
-| `.gitignore`       | Ignores `.venv`, `.env`, `__pycache__`, `data/extracted/`, `data/chroma_db/experiments/` | Experiment stores under `experiments/` gitignored (Phase 13.3) |
-| `src/`             | `config.py`, `ingestion.py`, `chunking.py`, `embeddings.py`, `vectorstore.py`, `retrieval.py`, `evaluation.py`, `metrics.py`, `judge.py`, `hybrid_retrieval.py`, `reranking.py` | Phases 3–13, all implemented      |
-| `scripts/`         | `ingest.py`, `retrieve.py`, `inspect_docs.py`, `inspect_chunks.py`, `inspect_vectors.py`, `embed_demo.py`, `run_evaluation.py`, `inspect_results.py`, `label_results.py`, `metrics.py`, `analyze_topk.py`, `run_hybrid_evaluation.py`, `run_rerank_evaluation.py`, `candidate_recall_analysis.py`, `rerank_analysis.py` | Phase verification + evaluation + experiment scripts |
+| `.gitignore`       | Ignores `.venv`, `.env`, `__pycache__`, `data/extracted/`, `data/chroma_db/experiments/` | Experiment stores under `experiments/` gitignored (Phase 16.3) |
+| `src/`             | `config.py`, `ingestion.py`, `chunking.py`, `embeddings.py`, `vectorstore.py`, `retrieval.py`, `evaluation.py`, `metrics.py`, `judge.py`, `hybrid_retrieval.py`, `reranking.py`, `generation.py`, `sources.py`, `sources_judge.py` | Phases 3–7, 15, 16, 8, 9 all implemented; `pipeline.py` is Phase 10 (next) |
+| `scripts/`         | `ingest.py`, `retrieve.py`, `inspect_docs.py`, `inspect_chunks.py`, `inspect_vectors.py`, `embed_demo.py`, `run_evaluation.py`, `inspect_results.py`, `label_results.py`, `metrics.py`, `analyze_topk.py`, `run_hybrid_evaluation.py`, `run_rerank_evaluation.py`, `candidate_recall_analysis.py`, `rerank_analysis.py`, `ask.py`, `run_citations.py`, `evaluate_citations.py` | Phase verification + evaluation + experiment scripts + Phase 8 CLI + Phase 9 citation build/eval |
 | `app.py`           | Naive end-to-end demo (PDF → store → retrieve)                  | NOT canonical; superseded by `src/` pipeline later |
 
-**Current implementation status — Phases 1–7, 12, 13 are DONE (Phase 13 done for the
-current iteration only); Phases 8–11 are NOT STARTED:**
+**Current implementation status — Phases 1–7, 8, 9, 10, 10.5, 15, 16 are DONE (Phases
+8/9/10/10.5/16 done for the current iteration); Phase 11 (Safety) is next:**
 
 - Phase 1 conceptual, Phase 2 Setup, Phase 3 Ingestion, Phase 4 Chunking, Phase 5
   Embeddings, Phase 6 Vector store, Phase 7 Retrieval are **implemented and working**.
-- Phase 12 Retrieval Evaluation and Phase 13 Retrieval Optimization are **complete for the
+- Phase 15 Retrieval Evaluation and Phase 16 Retrieval Optimization are **complete for the
   current iteration** and the leading retrieval architecture is **VALIDATED / FROZEN FOR
-  NOW**. Retrieval optimization is paused; the next engineering phase is Phase 8 —
-  Generation (NOT STARTED).
+  NOW**. Retrieval optimization is paused. Further retrieval/ranking research is explicitly
+  out of the current execution plan (section 12).
+- Phase 8 — Generation is **DONE / FROZEN for the current iteration** (`src/generation.py`
+  + `scripts/ask.py` implemented; evaluated with the v2 grounding prompt: 33/44 correct,
+  44/44 grounded, 40/44 complete, 3/3 appropriate refusals — `generation_v2_judged.jsonl`).
+- Phase 9 — Sources/citations is **IMPLEMENTED / VALIDATED for the current iteration**
+  (`src/sources.py` + `src/sources_judge.py` + `scripts/run_citations.py` +
+  `scripts/evaluate_citations.py`; 47 questions, 92 claims, 130 citations; 88/88 answerable
+  claims covered, 47/47 questions traceable, 130/130 citations → retrieved chunks).
+- `src/pipeline.py` exists (Phase 10, DONE) — `query()` + `retrieve_top_k()` + `Answer`.
+- `app/main.py` + `app/schemas.py` exist (Phase 10.5, DONE) — FastAPI `GET /health`,
+  `POST /ask`.
 - `src/chunking.py` accepts `chunk_size` / `chunk_overlap` parameters
   (`chunk_documents(documents, chunk_size=500, chunk_overlap=50)`).
 - Metadata on every chunk: `chunk_id`, `source`, `page` (0-based), `page_label` (1-based),
   plus PDF-level fields (`title`, `author`, ...). Section titles are extracted into a
   `section` field on chunks in the experimental stores (used in failure analysis).
 - Chroma scores are **L2 distances**: lower = more similar; rank 1 = smallest distance.
-- **Deviation from the original Phase 12.5 plan (manual labeling → LLM-as-a-Judge):** the
+- **Deviation from the original Phase 15.5 plan (manual labeling → LLM-as-a-Judge):** the
   evaluation lab labels relevance with an **LLM judge** (`deepseek/deepseek-v4-flash`,
   temperature 0, rubric in `src/judge.py`) instead of manual human labeling. Labels are
   written to a **separate `<name>_labeled.jsonl` derivative** of the frozen retrieval file —
@@ -57,12 +67,16 @@ current iteration only); Phases 8–11 are NOT STARTED:**
 | 5 — Embeddings | **DONE** | `src/embeddings.py` (all-MiniLM-L6-v2; mpnet tested and rejected) |
 | 6 — Vector store | **DONE** | `src/vectorstore.py`, Chroma, L2; isolated experiment stores |
 | 7 — Retrieval | **DONE** | `src/retrieval.py`; dense top-10 evaluation |
-| 8 — Generation | **NOT STARTED** | — |
-| 9 — Sources/citations | **NOT STARTED** | — |
-| 10 — Pipeline | **NOT STARTED** | — |
-| 11 — UI | **NOT STARTED** | — |
-| 12 — Retrieval Evaluation | **DONE** | `evaluation/dataset.json`, baseline metrics, `failures.md` |
-| 13 — Retrieval Optimization | **DONE FOR CURRENT ITERATION** | `evaluation/metrics/comparison.md`; hybrid + rerank + holdout validation; architecture frozen |
+| 8 — Generation | **DONE / FROZEN (current iteration)** | `src/generation.py`, `scripts/ask.py`; v2 grounding prompt; 33/44 correct, 44/44 grounded, 40/44 complete, 3/3 refusals (`generation_v2_judged.jsonl`, `generation_prompt_comparison.md`) |
+| 9 — Sources/citations | **IMPLEMENTED / VALIDATED (current iteration)** | `src/sources.py`, `src/sources_judge.py`, `scripts/run_citations.py`, `scripts/evaluate_citations.py`; 47 questions, 92 claims, 130 citations; coverage 88/88 answerable claims, traceability 47/47 questions + 130/130 citations → retrieved chunks; `citations_evaluation.md` |
+| 10 — End-to-end RAG pipeline | **NEXT (design approved; not implemented)** | `src/pipeline.py` — `retrieve_top_k()` + `query()` + `Answer` dataclass; see phase block below |
+| 10.5 — FastAPI | **DONE (current iteration)** | `app/main.py`: `GET /health`, `POST /ask`; thin layer over `src.pipeline.query()`; `app/schemas.py` |
+| 11 — Safety / guardrails | **DONE FOR THE CURRENT ITERATION** | `src/safety.py` (deterministic patient-specific gate + refusal-signal classification), `app/schemas.py` (SafetyResponse), safety dataset + evaluation (`evaluation/safety_dataset_v1.json`, `evaluation/metrics/safety_evaluation.md`); see phase block below |
+| 12 — Confidence / observability | **NOT STARTED** | evidence-based HIGH/MEDIUM/LOW/REFUSE states |
+| 13 — End-to-end evaluation | **NOT STARTED** | generation + citations + safety + failure attribution |
+| 14 — UI / client | **NOT STARTED (optional)** | thin FastAPI client; Gradio is NOT a core dependency |
+| 15 — Retrieval Evaluation | **DONE** | `evaluation/dataset.json`, baseline metrics, `failures.md` |
+| 16 — Retrieval Optimization | **DONE FOR CURRENT ITERATION** | `evaluation/metrics/comparison.md`; hybrid + rerank + holdout validation; architecture frozen |
 
 **Current retrieval architecture (VALIDATED / FROZEN FOR NOW):**
 
@@ -75,10 +89,19 @@ PDF → ingestion → chunking (800/100) → MiniLM embeddings
 Validated metrics (see section 10 and `evaluation/metrics/comparison.md` for definitions):
 
 ```text
-Original 20-question benchmark:  P@3 0.5167, P@5 0.4000, Hit@3 0.90, Hit@5 0.95, Hit@10 0.95
-27-question holdout:              P@3 0.5802, P@5 0.4519, Hit@3 0.9259, Hit@5 0.9259, Hit@10 0.9259
-Answerable candidate recall:      19/19 benchmark, 25/25 holdout (100%)
+Frozen architecture (reranked hybrid, 800/100), 20-question benchmark:
+  P@1 0.850, P@3 0.533, P@5 0.390, P@10 0.245, MRR 0.879, Hit@5 0.95
+27-question holdout:
+  P@1 0.815, P@3 0.580, P@5 0.452, P@10 0.311, MRR 0.870, Hit@5 0.926
+Answerable candidate recall:      ~100% benchmark and holdout
 ```
+
+**Known limitation of the frozen reranker (documented, not being fixed now):** candidate
+recall is strong and the cross-encoder helps, but top-3/top-5 precision is imperfect because
+semantic relevance ≠ answer usefulness. The Idea A (adaptive context) and Idea B (second
+ranking layer) experiments were run and **rejected** for lack of consistent gains; see
+`evaluation/experiments/adaptive_context_vs_second_ranker/REPORT.md`. Improvements in this
+area are future research (section 12), not part of the current execution plan.
 
 **A design decision made for us by the environment:** the original brief suggested Gemini,
 but you already have an **OpenRouter** key configured. OpenRouter exposes an
@@ -178,9 +201,9 @@ User question              │
       ↓
   grounded answer
       ↓
-  source attribution        <- map answer points back to file/page/chunk
-      ↓
-    Gradio UI               <- thin wrapper: upload PDFs, ask questions
+   source attribution        <- map answer points back to file/page/chunk
+       ↓
+   FastAPI / UI (optional)   <- thin wrapper: POST /ask, or optional client
 ```
 
 ### With LangChain — the same pipeline, named abstractions
@@ -236,9 +259,9 @@ scripts (`scripts/ingest.py`, `scripts/ask.py`) makes each easy to test alone.
 
 ### 4.2 The core pipeline is UI-independent
 
-Gradio only *calls* `rag.query(question)`. It never contains RAG logic. This means you can
-test everything from the terminal with `scripts/ask.py` and the UI is just a cosmetic layer.
-If the UI breaks, the RAG system still works.
+The UI/API only *calls* `pipeline.query(question)`. It never contains RAG logic. This means
+you can test everything from the terminal with `scripts/ask.py` and the UI is just a
+cosmetic layer. If the UI breaks, the RAG system still works.
 
 ### 4.3 Retrieval is observable
 
@@ -279,57 +302,58 @@ rag-project/                      (this folder)
 ├── data/
 │   ├── pdfs/                     ← your PDFs (Project_pdf.pdf already here)
 │   └── chroma_db/                ← persisted vector store (baseline, exists)
-│       └── experiments/          ← Phase 13: one sub-folder PER chunk configuration (gitignored)
+│       └── experiments/          ← Phase 16: one sub-folder PER chunk configuration (gitignored)
 │           ├── large_800_100/    ← 800/100 + MiniLM (the selected chunk config)
 │           ├── large_500_75/     ← 500/75 + MiniLM
 │           └── embedding_mpnet_800_100/ ← 800/100 + all-mpnet-base-v2 (rejected)
 │
 ├── src/
 │   ├── __init__.py
-│   ├── config.py                 ← reads .env, holds model/embedding settings (+ eval paths, Phase 12)
+│   ├── config.py                 ← reads .env, holds model/embedding settings (+ eval paths, Phase 15)
 │   ├── ingestion.py              ← PDF → Documents (PyPDFLoader)
 │   ├── chunking.py               ← Documents → Chunks (splitter + metadata) [DONE]
 │   ├── embeddings.py             ← embedding model setup (all-MiniLM-L6-v2) [DONE]
 │   ├── vectorstore.py            ← Chroma setup: add chunks, persist (+ persist_dir param) [DONE]
 │   ├── retrieval.py              ← question → top-K chunks (observable) [DONE]
-│   ├── evaluation.py             ← Phase 12: run all questions, persist top-10 results (no LLM) [DONE]
-│   ├── metrics.py                ← Phase 12: Precision@K / Hit@K on labeled results [DONE]
-│   ├── judge.py                  ← Phase 12.5: LLM relevance judge (deepseek-v4-flash, temp 0) [DONE]
-│   ├── hybrid_retrieval.py       ← Phase 13.5: dense + BM25 + RRF (experiment) [DONE]
-│   ├── reranking.py              ← Phase 13.5: cross-encoder over the candidate pool [DONE]
-│   ├── generation.py             ← context + question → LLM answer (Phase 8, later) [NOT STARTED]
-│   ├── sources.py                ← citation resolution (marker → file/page/chunk) (Phase 9, later)
-│   └── pipeline.py               ← rag.query(question) → Answer + Sources (Phase 10, later)
+│   ├── evaluation.py             ← Phase 15: run all questions, persist top-10 results (no LLM) [DONE]
+│   ├── metrics.py                ← Phase 15: Precision@K / Hit@K on labeled results [DONE]
+│   ├── judge.py                  ← Phase 15.5: LLM relevance judge (deepseek-v4-flash, temp 0) [DONE]
+│   ├── hybrid_retrieval.py       ← Phase 16.5: dense + BM25 + RRF (experiment) [DONE]
+│   ├── reranking.py              ← Phase 16.5: cross-encoder over the candidate pool [DONE]
+│   ├── generation.py             ← context + question → LLM answer (Phase 8) [DONE/FROZEN]
+│   ├── sources.py                ← citation resolution (claim → file/page/chunk) (Phase 9) [DONE]
+│   └── pipeline.py               ← query(question) → Answer + Sources (Phase 10, next)
 │
 ├── scripts/
 │   ├── ingest.py                 ← CLI: index PDFs into Chroma (+ --chunk-size/--overlap/--persist-dir) [DONE]
 │   ├── inspect_docs.py / inspect_chunks.py / inspect_vectors.py / embed_demo.py ← Phase verification [DONE]
 │   ├── retrieve.py               ← CLI: retrieval-only inspection (no LLM) [DONE]
-│   ├── run_evaluation.py         ← Phase 12.2/12.3: run every eval question, persist top-10 results [DONE]
-│   ├── inspect_results.py        ← Phase 12.4: print full result records for a question [DONE]
-│   ├── label_results.py          ← Phase 12.5: LLM-as-a-Judge labeling (derivative JSONL) [DONE]
-│   ├── metrics.py                ← Phase 12.6/12.7: Precision@3, Precision@5 [DONE]
-│   ├── analyze_topk.py           ← Phase 12.8: Top-3 vs Top-5 vs Top-10 analysis [DONE]
-│   ├── run_hybrid_evaluation.py  ← Phase 13.5: hybrid (dense+BM25+RRF) evaluation runner [DONE]
-│   ├── run_rerank_evaluation.py  ← Phase 13.5: cross-encoder rerank runner [DONE]
-│   ├── candidate_recall_analysis.py ← Phase 13.5: candidate-recall analysis [DONE]
-│   ├── rerank_analysis.py        ← Phase 13.5: rank-movement analysis [DONE]
-│   ├── ask.py                    ← CLI: full RAG question → answer + sources (Phase 10, later)
+│   ├── run_evaluation.py         ← Phase 15.2/15.3: run every eval question, persist top-10 results [DONE]
+│   ├── inspect_results.py        ← Phase 15.4: print full result records for a question [DONE]
+│   ├── label_results.py          ← Phase 15.5: LLM-as-a-Judge labeling (derivative JSONL) [DONE]
+│   ├── metrics.py                ← Phase 15.6/15.7: Precision@3, Precision@5 [DONE]
+│   ├── analyze_topk.py           ← Phase 15.8: Top-3 vs Top-5 vs Top-10 analysis [DONE]
+│   ├── run_hybrid_evaluation.py  ← Phase 16.5: hybrid (dense+BM25+RRF) evaluation runner [DONE]
+│   ├── run_rerank_evaluation.py  ← Phase 16.5: cross-encoder rerank runner [DONE]
+│   ├── candidate_recall_analysis.py ← Phase 16.5: candidate-recall analysis [DONE]
+│   ├── rerank_analysis.py        ← Phase 16.5: rank-movement analysis [DONE]
+│   ├── ask.py                    ← CLI: full RAG question → answer (Phase 8) [DONE]; Phase 10 extends it to citations
 │   └── evaluate.py               ← CLI: run the evaluation dataset, print metrics (superseded by run_evaluation.py)
 │
 ├── evaluation/
-│   ├── dataset.json              ← Phase 12.1: 20 fixed questions (reused by EVERY experiment) [FROZEN]
-│   ├── holdout_dataset_v1.json   ← Phase 13.8: 27 held-out questions (generalization test)
-│   ├── results/                  ← Phase 12.3: persisted top-10 retrievals (one JSONL per configuration)
-│   ├── metrics/                  ← Phase 12.6/12.7 & 13.4: P@3/P@5 outputs + comparison table
-│   ├── failures.md               ← Phase 12.9: documented retrieval failure analysis
-│   └── experiment_notes.md       ← Phase 13: hypotheses, per-experiment configs, decisions
+│   ├── dataset.json              ← Phase 15.1: 20 fixed questions (reused by EVERY experiment) [FROZEN]
+│   ├── holdout_dataset_v1.json   ← Phase 16.8: 27 held-out questions (generalization test)
+│   ├── results/                  ← Phase 15.3: persisted top-10 retrievals (one JSONL per configuration)
+│   ├── metrics/                  ← Phase 15.6/15.7 & 16.4: P@3/P@5 outputs + comparison table
+│   ├── failures.md               ← Phase 15.9: documented retrieval failure analysis
+│   └── experiment_notes.md       ← Phase 16: hypotheses, per-experiment configs, decisions
 │
 ├── app/
-│   └── gradio_app.py             ← thin UI calling pipeline.py (Phase 11, later) [NOT STARTED]
+│   ├── main.py                   ← FastAPI (Phase 10.5): GET /health, POST /ask [NOT STARTED]
+│   └── gradio_app.py             ← optional thin client of the API (Phase 14) [NOT STARTED]
 │
 ├── experiments/
-│   ├── final_configuration.md    ← Planned deliverable for 13.6/13.7. NOT created — deviation:
+│   ├── final_configuration.md    ← Planned deliverable for 16.6/16.7. NOT created — deviation:
 │   │                                final configuration + justification folded into
 │   │                                evaluation/metrics/comparison.md (see below)
 │   └── phase1_notes.md           ← Phase 1 mental-model notes
@@ -340,7 +364,7 @@ rag-project/                      (this folder)
 **Why this shape (and what we dropped from the suggested structure):**
 - Dropped `src/ingestion/`, `src/processing/`... sub-packages → single modules per concern.
   Simpler to read, fewer files, same boundaries.
-- Dropped `tests/` until later — tests are valuable, but the *evaluation lab* (Phases 12–13)
+- Dropped `tests/` until later — tests are valuable, but the *evaluation lab* (Phases 15–16)
   is the project's test harness: it measures retrieval objectively and is kept in `src/` and
   `scripts/` rather than a separate framework.
 - Kept `experiments/` — this is where we record results of each improvement so we never lose
@@ -370,7 +394,7 @@ We add packages *only when a phase needs them*. Starting set (current file alrea
 | `chromadb` | The local vector database itself | 6 |
 | `langchain-openai` | `ChatOpenAI` — talks to OpenRouter (OpenAI-compatible) | 8 |
 | `openai` | Underlying SDK that `ChatOpenAI` uses (already installed) | 8 |
-| `gradio` | The web UI | 11 |
+| `gradio` | Optional thin UI client (NOT a core dependency) | 14 |
 
 **Notes:**
 - `sentence-transformers` downloads `all-MiniLM-L6-v2` (~80 MB) from HuggingFace on first
@@ -400,35 +424,35 @@ flow stays visible. `rag.query(question)` is a normal function, not a magic chai
 
 ---
 
-## 8. How Gradio fits
+## 8. How the interface fits
 
-Gradio is the **last** layer, added in Phase 11. It has two tabs:
+The **production backend is FastAPI** (a thin HTTP layer, Phase 10.5). Gradio is **NOT** a
+core architecture dependency — it is at most an **optional** thin client (Phase 14). The
+whole system is fully usable from the terminal (`scripts/ask.py`) and via the API.
 
-1. **Ingest**: upload one or more PDFs → saved to `data/pdfs/` → indexed into the vector
-   store. It calls the *same* `scripts/ingest.py` logic, not its own.
-2. **Ask**: a text box → calls `rag.query(question)` → displays the answer, the retrieved
-   chunks, and the citations (file + page + chunk id).
-
-Rule: **Gradio contains zero RAG logic.** If we delete `app/gradio_app.py`, the entire system
-still works from the terminal.
+Rule: **the UI/API contains zero RAG logic.** If we delete `app/`, the entire system still
+works from the terminal.
 
 ---
 
-## 9. The 13 phases
+## 9. The phases
 
 Each phase block below includes: purpose, what we build, concepts you must know first,
 technologies, verification, definition of done, and common mistakes. When we execute a phase
 we will also follow the phase-completion format from section 13.
 
 > **Reading order / implementation order note.**
-> Phases 1–7 are **DONE** (Phase 1 conceptual, Phases 2–7 code). The original plan then
-> continued with Generation/Sources/Pipeline/Gradio (Phases 8–11).
-> Phases **12 (Retrieval Evaluation)** and **13 (Retrieval Optimization)** are a
-> self-contained lab that depends **only on Phases 2–7**. Per the lab brief, Generation was
-> **not** implemented to reach evaluation; Phases 12–13 were run immediately after Phase 7.
-> Both are now **complete for the current iteration** and the leading retrieval architecture
-> is **frozen** — retrieval optimization is paused. Phases 8–11 (Generation, Sources,
-> Pipeline, Gradio) are the next build targets, starting with **Phase 8 — Generation**.
+> Phases 1–7 are **DONE** (Phase 1 conceptual, Phases 2–7 code). The retrieval lab
+> (originally Phases 12–13, **renumbered to 15–16** in this update) is a self-contained lab
+> that depends **only on Phases 2–7**. Per the lab brief, Generation was **not** implemented
+> to reach evaluation; the lab was run immediately after Phase 7.
+> Both lab phases are now **complete for the current iteration** and the leading retrieval
+> architecture is **FROZEN** — retrieval optimization is paused. Phases 8 (Generation) and
+> 9 (Sources/citations) are **done / frozen for the current iteration**.
+> The next build target was **Phase 10 — End-to-end RAG pipeline** (done), then **Phase 10.5 —
+> FastAPI** (done), then Phases 11 (Safety), 12 (Confidence), 13 (End-to-End Evaluation), and
+> 14 (UI/Client, optional). Future retrieval/ranking research is explicitly **not part of
+> the current execution plan** (see section 12).
 
 ---
 
@@ -515,7 +539,7 @@ came out.
 **Status: DONE — `src/chunking.py` uses `RecursiveCharacterTextSplitter`
 (500 / 50) and adds `chunk_id`; verified with `scripts/inspect_chunks.py`.
 `chunk_documents(documents, chunk_size, chunk_overlap)` already accepts parameters
-(needed for Phase 13 experiments).**
+(needed for Phase 16 experiments).**
 
 **Purpose:** split long text into retrievable, embeddable pieces.
 
@@ -617,7 +641,7 @@ and see data persist across runs.
 **Status: DONE — `src/retrieval.py` uses `similarity_search_with_score`
 (no LLM); `scripts/retrieve.py` prints rank, score, chunk id, page, and text.
 Note: current `TOP_K` default is 5 (from `.env`); the evaluation lab uses
-top-10 explicitly (Phase 12.2).**
+top-10 explicitly (Phase 15.2).**
 
 **Purpose:** turn a question into ranked, inspected chunks — **with no LLM involved**.
 
@@ -646,17 +670,19 @@ why they came back, and what the scores mean — with no LLM in the loop.
 
 ---
 
-> **Lab note:** Phases 8–11 (Generation, Sources, Pipeline, Gradio) complete the original RAG
-> pipeline. The retrieval evaluation lab (Phases 12–13) does **not** need them and must not
-> wait for them. You may implement Phases 12–13 now and return to 8–11 afterwards. The next
-> `Next Implementation Sequence` section (end of this document) gives the exact order.
+> **Lab note:** Phases 8–9 (Generation, Sources/citations) and the forward Phases 10–14
+> (Pipeline, FastAPI, Safety, Confidence, End-to-End Evaluation, UI) complete the RAG
+> pipeline. The retrieval evaluation lab (Phases 15–16) does **not** need them and did not
+> wait for them. The `Next Implementation Sequence` section (end of this document) gives the
+> exact order.
 
 ---
 
 ### Phase 8 — Generation
 
-**Status: NOT STARTED — next phase to build.** Retrieval is frozen/validated, so Generation
-can now be implemented on top of the frozen `Top-10` retrieval architecture.
+**Status: DONE / FROZEN FOR THE CURRENT ITERATION.** Retrieval is frozen/validated, and
+Generation is built on top of the frozen `Top-10` retrieval architecture. Generation is not
+being re-optimized in the current execution plan.
 
 **Purpose:** turn question + retrieved context into a grounded answer.
 
@@ -665,9 +691,21 @@ context, question), context window limits, grounding, hallucination, and **refus
 Prompt design that explicitly says: *"Answer only from the context. If the context does not
 contain the answer, say 'not found in the documents'."*
 
-**Build:** `src/generation.py`: assemble context from the retrieved chunks → build prompt with
-`ChatPromptTemplate` → call `ChatOpenAI(base_url=OpenRouter, model=deepseek/deepseek-v4-flash)`
-→ return the answer. Keep chunk indices in the prompt (e.g. `[1]`, `[2]`) so the LLM can cite.
+**Build (IMPLEMENTED):** `src/generation.py`: `build_context()` assembles the context from the
+retrieved chunks (keeping chunk indices and metadata like `chunk_id`, `page`, `source`, `rank`
+in each `[Chunk N]` block) → `build_prompt()` builds the grounding system + user messages →
+`generate_answer(question, retrieved_chunks)` calls `ChatOpenAI(base_url=OpenRouter,
+model=deepseek/deepseek-v4-flash)` (same client pattern as `src/judge.py`) → returns the answer
+text. `scripts/ask.py` is a CLI that runs the frozen retrieval (`run_hybrid` + `rerank_candidates`
+from `src/hybrid_retrieval.py`/`src/reranking.py`, canonical `large_800_100` store) for a single
+question and feeds the Top-K chunks to generation:
+
+```text
+$ python scripts/ask.py "Which medicine is offered as first-line treatment for absence seizures?"
+```
+
+Generation never retrieves on its own — it receives already-retrieved chunks, so the frozen
+retrieval architecture is untouched.
 
 **Under the hood:** `ChatOpenAI` sends an HTTP request to OpenRouter with your messages and
 streams back tokens. The context window (for this model, on the order of ~64k–128k tokens)
@@ -681,14 +719,29 @@ bounds how many chunks fit — that is why we only send top-K, not the whole doc
 **Common mistakes:** a weak prompt that lets the LLM ignore context; sending too much context
 (overflow); not testing the refusal case; judging generation before verifying retrieval.
 
+**Measured results (frozen for this iteration; see `evaluation/results/generation_v2_judged.jsonl`
+and `evaluation/metrics/generation_prompt_comparison.md`):**
+
+```text
+Correctness (answerable):      33/44 = 75.0%   (9 partially correct, 2 incorrect)
+Grounded:                      44/44 = 100%
+Complete:                      40/44 = 90.9%   (1 partial, 3 incomplete)
+Refusals (non-answerable):     3/3   = 100% appropriate refusal
+```
+
+**Known limitations (documented, not being fixed now):** multi-part answers occasionally
+omit a part; neighboring-recommendation answers can conflate; occasional over-abstention.
+
 **Definition of done:** answerable questions get grounded answers; unanswerable ones are
-correctly refused.
+correctly refused. Met.
 
 ---
 
 ### Phase 9 — Source attribution (citations)
 
-**Status: NOT STARTED — depends on Phase 8 (Generation).**
+**Status: DONE FOR THE CURRENT ITERATION — the claim-level citation layer is implemented,
+built, and evaluated. Retrieval, Generation (v2 prompt), and the citation mapping/judge
+config are frozen for this iteration.**
 
 **Purpose:** map every part of the answer back to file + page + chunk.
 
@@ -696,40 +749,95 @@ correctly refused.
 (chunk `[n]` in the prompt → answer contains `[n]` → we resolve `[n]` to its filename, page,
 and chunk id), and why citations let a user verify the answer.
 
-**Build:** `src/sources.py`: resolve markers found in the answer into a source list, e.g.:
+**Implemented architecture (deviation from the plan's marker scheme):** rather than relying
+on the LLM to emit `[n]` markers (fragile — the model may omit or invent markers), Phase 9
+builds citations deterministically from the generated answer:
 
+```text
+answer text
+  → split_claims()                sentence-level claims (abbreviation/decimals safe,
+                                  bullets split, list-header ":" lines dropped)
+  → pick_candidates()             deterministic token-overlap pre-filter over the frozen
+                                  Top-10 retrieved chunks (max_candidates=3,
+                                  min_overlap=0.05)
+  → select_supporting_chunks()    LLM selector picks the subset of candidates that support
+                                  each claim (src/sources_judge.py)
+  → make_citation()               citation = question_id + claim_id + chunk_id + exact
+                                  chunk_text + page/page_label/source (copied from the
+                                  frozen chunk record, never invented)
+  → validate_citations()          deterministic traceability check
 ```
-[1] → Project_pdf.pdf, page 12, chunk 104
+
+`src/sources.py` is the deterministic core (`split_claims`, `token_overlap`,
+`pick_candidates`, `is_refusal_claim` for no-evidence/refusal claims, `make_citation`,
+`build_citations`, `validate_citations`). `src/sources_judge.py` holds the LLM
+selector/evaluator plus a **deterministic offline fallback** for the support judge
+(`judge_citation_support_deterministic`, token-overlap proxy) that lets the evaluation run
+without API credits (OpenRouter returned HTTP 402 on every call).
+
+**Scripts:**
+- `scripts/run_citations.py` — resumable builder; reads `evaluation/results/generation_v2.jsonl`,
+  writes `evaluation/results/citations_v1.jsonl` (47 questions, 92 claims, 130 citations).
+- `scripts/evaluate_citations.py` — resumable evaluator; judges each citation's support
+  (LLM, falling back to the deterministic proxy), carries build validation forward, writes
+  `evaluation/results/citations_v1_judged.jsonl` and `evaluation/metrics/citations_evaluation.json`.
+
+**Measured results (see `evaluation/metrics/citations_evaluation.md`):**
+
+```text
+Coverage (answerable claims cited):       88/88 = 100%
+Citations:                                130
+Support (deterministic fallback judge):   111 supported, 19 partially, 0 unsupported
+Support (earlier LLM judge run):          109 supported, 10 partially, 2 unsupported
+Traceability (questions valid):           47/47 = 100%
+Traceability (citations → retrieved):     130/130 = 100%
+No-evidence claims (uncited by design):   1 (H12 C2)
 ```
 
-Keep this simple: the prompt numbers the chunks, the LLM references `[1]`, `[2]`, and we
-resolve the numbers against the retrieved list. Fancier citation frameworks are an
-*advanced* step for later, not now.
+**Verification:** `python scripts/evaluate_citations.py` (resumable; skip already-judged
+questions) re-runs cleanly offline and reports 47/47 questions with non-null support.
 
-**Verification:** for a few questions, confirm each citation points at the actual chunk the
-answer came from, and the page number matches.
+**Common mistakes (observed in Phase 9):** metadata lost at chunking; markers not in the
+prompt; resolving against the wrong retrieval; **citations that are relevant but do not
+support the specific claim** (see `evaluation/citations_failures.md` — H12 C1 → chunk 240
+and Q16 C2 → chunk 20).
 
-**Common mistakes:** metadata lost at chunking; markers not in the prompt; resolving against
-the wrong retrieval.
-
-**Definition of done:** every answer ships with citations that point to real, correct chunks.
+**Definition of done:** every answer ships with citations that point to real, correct
+chunks. Met: all citations resolve to an actually-retrieved chunk, cite the exact stored
+chunk text, and carry the chunk's real page/source.
 
 ---
 
-### Phase 10 — RAG pipeline assembly
+### Phase 10 — End-to-end RAG pipeline
 
-**Status: NOT STARTED — depends on Phases 8 and 9.**
+**Status: NEXT — the immediate implementation target. Depends on Phases 8 and 9, both DONE.
+Design approved (see below); implementation has NOT started.**
 
 **Purpose:** combine components into one clean entry point:
 
 ```text
-rag.query(question)  →  retrieval  →  context  →  prompt  →  LLM  →  citation resolution
-                     →  Answer + Sources
+query(question)  →  frozen retrieval Top-10  →  build_context  →  generate_answer
+                 →  build_citations  →  validate_citations  →  Answer
 ```
 
-**Build:** `src/pipeline.py` exposing `rag.query(question)` returning a small `Answer` object
-`(answer, sources, retrieved_chunks)`. `scripts/ask.py` prints the answer, then the sources
-and the retrieved chunks.
+**Build:** `src/pipeline.py` (does not exist yet) exposing:
+
+- `retrieve_top_k(question, persist_dir=STORE, final_k=10)` — reproduces the exact chain in
+  `scripts/ask.py`: `run_hybrid` → `rerank_candidates` → keep `reranker_rank <= final_k`.
+  Question id `"ASK"` (one-off, not stored). Canonical store
+  `data/chroma_db/experiments/large_800_100`.
+- `query(question, *, persist_dir, top_k, max_tokens, selector)` — one call that runs the
+  whole flow and returns an `Answer` dataclass:
+  `(question, answer, claims, retrieved_chunks, citations_valid, validation_errors)`.
+- `selector` = optional `select_supporting_chunks` callable (defaults to the LLM selector in
+  `src/sources_judge.py`). **There is NO automatic fallback on `SourceJudgeError`**: the
+  pipeline must fail closed. Do NOT fall back to `selector=None` (all-candidates) or to any
+  broader citation assignment on selection failure.
+
+**Frozen components reused as-is (do NOT modify):** `src/hybrid_retrieval.py` (`run_hybrid`),
+`src/reranking.py` (`rerank_candidates`), `src/generation.py` (`build_context`,
+`generate_answer`), `src/sources.py` (`build_citations`, `validate_citations`),
+`src/sources_judge.py` (`select_supporting_chunks`, deterministic fallback).
 
 **Important:** keep every component individually importable — `retrieval`, `generation`, and
 `sources` must still work on their own (this is what makes debugging possible).
@@ -738,37 +846,212 @@ and the retrieved chunks.
 end. Also verify components independently.
 
 **Common mistakes:** fusing components into one big function; hiding scores from the caller;
-coupling the pipeline to Gradio.
+coupling the pipeline to a UI; automatically broadening citations on selection failure
+(must fail closed — preserve the answer, set `citations_valid=false`, populate
+`validation_errors`, never invent or widen citations).
 
-**Definition of done:** a single `rag.query(question)` call produces answer + sources, and
-every stage is independently testable.
-
----
-
-### Phase 11 — Gradio interface
-
-**Status: NOT STARTED — depends on Phase 10.**
-
-**Purpose:** a thin UI over the working pipeline.
-
-**Concepts to learn:** separating presentation from logic; upload flows; async-friendly
-calls.
-
-**Build:** `app/gradio_app.py`:
-- **Upload tab** — save PDFs to `data/pdfs/`, call the ingestion logic.
-- **Ask tab** — call `rag.query(question)`, display answer, sources, and retrieved chunks.
-
-**Verification:** run `python app/gradio_app.py`, upload `Project_pdf.pdf`, ask a question,
-see answer + citations.
-
-**Common mistakes:** putting RAG logic in the UI; not re-indexing after uploading a new PDF;
-blocking the UI thread on slow calls.
-
-**Definition of done:** the UI works end to end and contains no RAG logic.
+**Definition of done (from the plan update):**
+1. One `query()` call executes the complete RAG flow.
+2. The returned result contains answer + claims + sources + retrieved chunks.
+3. Citation validation status is explicit in the result.
+4. Existing component behavior is unchanged.
+5. On citation-selection failure (`SourceJudgeError`) the pipeline **fails closed**: it
+   preserves the generated answer, sets `citations_valid = false`, populates
+   `validation_errors`, and does not invent or broaden citations (no fallback to
+   all-candidates / `selector=None`).
 
 ---
 
-### Phase 12 — Retrieval Evaluation (the lab: measure before improving)
+### Phase 10.5 — FastAPI (thin HTTP layer)
+
+**Status: DONE FOR THE CURRENT ITERATION — depends on Phase 10 (done). Implemented:
+`app/main.py` (`GET /health`, `POST /ask`), `app/schemas.py` (Pydantic request/response
+models), FastAPI + uvicorn added to `requirements.txt`. Verified via TestClient; see
+`README.md` (FastAPI API section) for usage.**
+
+**Purpose:** expose the pipeline as a minimal API. The production backend is **FastAPI** (a
+thin layer). Gradio is NOT a core architecture dependency — see Phase 14.
+
+**Build:** `app/main.py`:
+- `GET /health` — returns `{"status": "ok"}` (no secrets / internal paths).
+- `POST /ask` — accepts `{"question": "..."}`, calls `pipeline.query(...)`, returns the
+  answer, claims, retrieved chunks, and citation validation status.
+- No RAG logic lives in the route handlers — routes only call `src.pipeline.py`.
+- `app/schemas.py` defines explicit Pydantic models (`AskRequest`, `AskResponse`,
+  `ClaimResponse`, `CitationResponse`, `RetrievedChunkResponse`, `HealthResponse`).
+
+**Error behavior:** invalid request (missing/empty/too-long `question`) → 422.
+Citation-selection failure → **200** with `citations_valid: false`, `validation_errors`
+populated, answer preserved (the pipeline fails closed — never invent/broaden citations).
+Unexpected pipeline failure → 500 with a safe, user-readable message (no stack traces, no
+credentials).
+
+**Concepts to learn:** FastAPI/Pydantic request models; separating transport from logic;
+sync vs async handlers; error responses for validation failures.
+
+**Verification:** start the server, `GET /health` returns 200; `POST /ask` with an
+answerable question returns answer + citations end to end (verified: real query returned
+answer + claims + 10 chunks + `citations_valid: true`; mocked `SourceJudgeError` returned
+200 + `citations_valid: false` + answer preserved).
+
+**Common mistakes:** putting RAG logic in the route handlers; returning raw internal error
+traces; blocking on long generation without a timeout.
+
+**Definition of done:** the API is a thin, documented wrapper over `pipeline.query()` with
+`/health` and `/ask`, and the pipeline works unchanged without the server. Met.
+
+---
+
+### Phase 11 — Safety / guardrails
+
+**Status: DONE FOR THE CURRENT ITERATION — depends on Phase 10.5 (done).**
+
+**Purpose:** prevent the system from producing misleading or harmful medical answers.
+
+**Build (minimal, explainable policy):**
+1. **Normal guideline/document questions** — answer with citations (existing behavior).
+2. **Insufficient evidence** — refuse with an explicit "not found in the documents" message;
+   do not invent or improvise an answer.
+3. **Patient-specific medical requests** (e.g. "Should I stop my medication?") — refuse;
+   direct to a qualified professional. Patient-specific requests must be detected and
+   declined, never answered from the guideline as if it were personalized advice.
+
+**Implemented (this iteration):**
+- `src/safety.py` — thin layer ABOVE the frozen pipeline:
+  - `SafetyResult(classification, reason, safe_to_answer)` with the three-way contract
+    NORMAL / PATIENT_SPECIFIC / INSUFFICIENT_EVIDENCE. `safe_to_answer` means "allowed to
+    proceed under the current safety policy" — NOT clinically safe / medically validated.
+  - `classify_intent(question)` — deterministic first-person / personal-reference gate
+    (`my`, `I`, `me`, `I'm`, `we`, `our`, `us`). Zero external LLM calls; cannot fail at
+    runtime; fail-closed by design. Known limitation: third-person scenario formulations
+    ("A 7-year-old has recurrent absence seizures...") are NOT detected — measured, not hidden.
+  - `classify_evidence(answer, claims)` — post-hoc refusal-signal interpretation. If the
+    frozen Generation V2 response consists of refusal claims, classify INSUFFICIENT_EVIDENCE
+    and preserve the answer verbatim. This is a SIGNAL, not independent proof of
+    insufficiency (H12 over-abstention can occur — counted as a false refusal).
+  - `query(question)` — orchestrator: PATIENT_SPECIFIC → safe refusal (pipeline NOT
+    executed); otherwise frozen `pipeline.query()` unchanged → evidence interpretation.
+- `app/schemas.py` — added `SafetyResponse {classification, reason, safe_to_answer}` at the
+  API boundary only. Internal `Answer` dataclass unchanged.
+- `app/main.py` — `/ask` routes through `src.safety.query`; response carries `safety`.
+
+**Refusal behavior:**
+- PATIENT_SPECIFIC: fixed safe message ("I can answer general questions from the clinical
+  guideline, but I can't provide individualized medical advice..."), empty claims/chunks,
+  `citations_valid=false`, `safe_to_answer=false`. No RAG call.
+- INSUFFICIENT_EVIDENCE: pipeline runs; the frozen generation's refusal text is preserved
+  verbatim; classified INSUFFICIENT_EVIDENCE, `safe_to_answer=false`.
+
+**Verification (evaluation/safety_dataset_v1.json, 18 cases: 7 NORMAL, 6 PATIENT_SPECIFIC,
+5 INSUFFICIENT_EVIDENCE):**
+- NORMAL → NORMAL 6/7, over-blocked 1/7 (S05 = H12-mirror; frozen generation over-refused an
+  answerable question — a false refusal, reported, NOT evidence insufficiency).
+- PATIENT_SPECIFIC → refused 3/6 (first-person); **2/6 answered (dangerous false negatives:
+  S11, S12 third-person formulations)**; 1/6 refused via evidence path (S13).
+- INSUFFICIENT_EVIDENCE → refused 5/5.
+- Most important metric: **PATIENT_SPECIFIC → answered = 2** (dangerous false negative).
+- Over-blocking metric: **NORMAL → refused = 1**.
+- Full confusion matrix: `evaluation/metrics/safety_evaluation.json` / `.md`.
+
+**Concepts to learn:** prompt-level policy vs post-hoc classifier; safety-case framing;
+fail-closed vs fail-open design.
+
+**Common mistakes:** relying on the LLM to self-police without any policy layer; answering
+patient-specific questions from general guidelines; treating refusal as a failure.
+
+**Definition of done:** the three-way policy is explicit, the pipeline refuses patient-
+specific and weak-evidence questions as specified, and no hallucinated fallback answer is
+ever returned. Met.
+
+**Known limitations (documented, not hidden):**
+1. First-person deterministic detection does not cover every possible patient-specific
+   formulation.
+2. Third-person scenario detection is a known limitation (measured: 2/6 cases answered).
+3. INSUFFICIENT_EVIDENCE is inferred from the frozen Generation refusal, not independently
+   verified.
+4. H12 demonstrates that over-abstention can occur (S05 reproduced it).
+5. This guardrail is not a medical safety guarantee or clinical device.
+
+---
+
+### Phase 12 — Confidence / observability
+
+**Status: NOT STARTED — depends on Phase 11.**
+
+**Purpose:** attach a confidence level and enough metadata for a user to judge reliability.
+
+**Build (evidence-based, NOT LLM self-reported confidence):**
+- Evidence sufficiency (did retrieval find supporting chunks?).
+- Citation support (what fraction of claims are supported?).
+- Retrieval quality (reranker score / number of relevant-looking chunks).
+- Number/strength of supporting chunks; conflicting-evidence detection.
+- Map signals to a small, honest label set: **HIGH / MEDIUM / LOW / REFUSE**.
+
+**Concepts to learn:** confidence calibration; observable signals vs vibes; separating
+confidence from correctness.
+
+**Verification:** each returned answer carries an explicit confidence state plus the signals
+that produced it, inspectable per question.
+
+**Common mistakes:** using an LLM's self-reported confidence; a single opaque score with no
+explanation; showing confidence as if it were accuracy.
+
+**Definition of done:** every pipeline result exposes a confidence state and the evidence
+signals behind it; the mapping from signals to states is documented.
+
+---
+
+### Phase 13 — End-to-end evaluation
+
+**Status: NOT STARTED — depends on Phases 10–12.**
+
+**Purpose:** measure the integrated product, not just isolated stages.
+
+**Build:** extend the existing evaluation to run end to end:
+- **Generation:** correctness, completeness, grounding, abstention (reuse the Phase 8 judge
+  and the 44-answerable + 3-refusal dataset).
+- **Citations:** coverage, support, traceability (reuse `scripts/evaluate_citations.py`).
+- **Safety:** patient-specific refusal, weak-evidence refusal (Phase 11 probes).
+- **Failure classification:** categorize each wrong answer by stage (retrieval /
+  generation / citation) rather than a single arbitrary score.
+
+**Concepts to learn:** end-to-end vs per-stage evaluation; failure attribution; regression
+testing across the frozen stages.
+
+**Verification:** one reproducible run produces the generation, citation, and safety numbers
+above and a stage-attribution table for failures.
+
+**Common mistakes:** replacing the per-stage numbers with a single arbitrary score; changing
+frozen components to chase a number; testing only happy paths.
+
+**Definition of done:** the end-to-end run is reproducible, per-stage numbers are reported,
+and failures are attributed to a stage.
+
+---
+
+### Phase 14 — UI / client (optional)
+
+**Status: NOT STARTED — optional; depends on Phase 10.5.**
+
+**Purpose:** an optional thin client over the FastAPI backend. Gradio is NOT a core
+architecture dependency — the system is fully usable from the terminal and the API.
+
+**Build (if pursued):** a minimal `app/gradio_app.py` (or any client) with:
+- **Ask tab** — calls the FastAPI `POST /ask`, displays answer, sources, retrieved chunks.
+- Optional **Ingest tab** — calls the existing ingestion logic.
+
+**Verification:** the client works end to end against the running API and contains no RAG
+logic of its own.
+
+**Common mistakes:** putting RAG logic in the UI; making the system depend on the UI to
+function; re-implementing the pipeline in the client.
+
+**Definition of done:** if built, the client is a thin consumer of the API and the system
+works without it.
+
+---
+
+### Phase 15 — Retrieval Evaluation (the lab: measure before improving)
 
 **Status: DONE — the retrieval evaluation lab was executed end-to-end. It requires only
 Phases 2–7. Labels use an LLM judge (deviation from the original manual-labeling plan —
@@ -787,7 +1070,7 @@ uses an LLM judge — see the deviation note in section 0); the
 `Precision@K = (relevant chunks in top K) / K` formula; the tradeoff between retrieving
 more context (Top-10) and introducing noise; retrieval failure vs generation failure.
 
-**Golden evaluation loop (applies to this phase and Phase 13):**
+**Golden evaluation loop (applies to this phase and Phase 16):**
 
 ```text
 Hypothesis → Experiment → Same evaluation questions → Retrieval
@@ -799,7 +1082,7 @@ Every claim must be backed by numbers, e.g. "Configuration A: P@3 = 0.73" — ne
 
 ---
 
-#### 12.1 Evaluation dataset
+#### 15.1 Evaluation dataset
 
 **Purpose:** a fixed set of ~20 questions, reused for every experiment so configurations are
 compared fairly. Without a fixed dataset, results are not comparable and the "experiment"
@@ -854,7 +1137,7 @@ Phase 2 config paths.
 
 ---
 
-#### 12.2 Evaluation runner (retrieval-only)
+#### 15.2 Evaluation runner (retrieval-only)
 
 **Purpose:** run retrieval for **every** evaluation question with `top_k = 10` (at least 10),
 using only the existing `retrieval`/`vectorstore` code. No LLM.
@@ -870,7 +1153,7 @@ distance), keeping the evaluation decoupled from the UI and from Generation.
 - Create `src/evaluation.py` with two functions:
   - `run_retrieval(dataset, persist_dir, top_k=10) -> list[dict]` — for each question,
     call retrieval (reusing `src/retrieval.py`, parameterized by `persist_dir`), and build
-    one result record per retrieved chunk (schema in 12.3).
+    one result record per retrieved chunk (schema in 15.3).
   - `write_results(records, path)` — write the records as JSONL.
 - Create `scripts/run_evaluation.py`: CLI that loads `evaluation/dataset.json`, runs
   retrieval against a given store, and writes results to `evaluation/results/`.
@@ -889,11 +1172,11 @@ distance), keeping the evaluation decoupled from the UI and from Generation.
 **Verification:** run `python scripts/run_evaluation.py --store data/chroma_db`
 and check the record count and a few records' `question_text` / `chunk_id` / `page`.
 
-**Dependencies:** Phase 7; 12.1.
+**Dependencies:** Phase 7; 15.1.
 
 ---
 
-#### 12.3 Top-10 retrieval result persistence
+#### 15.3 Top-10 retrieval result persistence
 
 **Purpose:** make every retrieved result reproducible and inspectable by persisting it, so
 labeling, metrics, and failure analysis all operate on the *same* frozen results.
@@ -923,11 +1206,11 @@ stored (we must not re-run retrieval to "remember" what was retrieved); idempote
 
 - `score` is the raw value from `similarity_search_with_score` (**L2 distance, lower =
   better**). Rank 1 always has the smallest score.
-- `section` is `metadata.get("section")` — currently `null` (see 12.4).
-- `relevant` starts as `null` and is set by manual labeling (12.5).
+- `section` is `metadata.get("section")` — currently `null` (see 15.4).
+- `relevant` starts as `null` and is set by manual labeling (15.5).
 
 **Expected files/modules:** new `src/evaluation.py` (record builder + writer) already
-created in 12.2; this sub-phase defines and freezes the schema. File naming convention:
+created in 15.2; this sub-phase defines and freezes the schema. File naming convention:
 `evaluation/results/<experiment_name>_top10.jsonl`.
 
 **Data/artifacts:** `evaluation/results/baseline_500_50_top10.jsonl` with the full schema.
@@ -940,11 +1223,11 @@ created in 12.2; this sub-phase defines and freezes the schema. File naming conv
 **Verification:** `python -c` loads the JSONL, validates the schema for every line, and
 prints field coverage (e.g. all records have `source` = the PDF path).
 
-**Dependencies:** 12.2.
+**Dependencies:** 15.2.
 
 ---
 
-#### 12.4 Result inspection (display complete retrieval results)
+#### 15.4 Result inspection (display complete retrieval results)
 
 **Purpose:** let a human read the *complete* retrieval result for any question: chunk text,
 score, source, page, section, chunk ID, rank — reusing the existing metadata, no new
@@ -967,7 +1250,7 @@ Q01: Which medicine is recommended as first-line treatment for Dravet syndrome?
 - **Section handling (explicit):** the current metadata has **no `section` field**.
   Display `section: N/A` whenever `metadata.get("section")` is `None`. Do **not** invent a
   second metadata system. A future optional enhancement (heading-based section detection
-  during chunking) is noted in Phase 13.5 but is not required for the lab.
+  during chunking) is noted in Phase 16.5 but is not required for the lab.
 
 **Expected files/modules:** new `scripts/inspect_results.py`. Reads only the persisted JSONL
 — it must **not** re-run retrieval (inspection and labeling must use the same frozen data).
@@ -982,11 +1265,11 @@ Q01: Which medicine is recommended as first-line treatment for Dravet syndrome?
 **Verification:** compare `python scripts/inspect_results.py baseline_500_50_top10.jsonl Q01`
 with `python scripts/retrieve.py` output for the same question (top-5 subset).
 
-**Dependencies:** 12.3.
+**Dependencies:** 15.3.
 
 ---
 
-#### 12.5 Relevance labeling (deviation: manual → LLM-as-a-Judge)
+#### 15.5 Relevance labeling (deviation: manual → LLM-as-a-Judge)
 
 **Purpose:** attach ground truth to every retrieved chunk so metrics can be computed, and
 persist it so it can be reused by every metric run.
@@ -1031,11 +1314,11 @@ filled in by the LLM judge).
 **Verification:** run the script once for the baseline file; re-run it and confirm zero
 prompts (all labeled); open the JSONL and confirm the `relevant` values.
 
-**Dependencies:** 12.4 (inspection) so the human can judge chunks; 12.3 (persistence).
+**Dependencies:** 15.4 (inspection) so the human can judge chunks; 15.3 (persistence).
 
 ---
 
-#### 12.6 Precision@3
+#### 15.6 Precision@3
 
 **Purpose:** measure how many of the top-3 retrieved chunks are actually relevant, per
 question and averaged.
@@ -1076,13 +1359,13 @@ Average Precision@3: 0.733
 **Verification:** hand-compute P@3 for `Q01` from its labels and compare with the script
 output.
 
-**Dependencies:** 12.5 (labels must exist).
+**Dependencies:** 15.5 (labels must exist).
 
 ---
 
-#### 12.7 Precision@5
+#### 15.7 Precision@5
 
-**Purpose:** same as 12.6 but over the top-5 — a slightly looser measure that tolerates one
+**Purpose:** same as 15.6 but over the top-5 — a slightly looser measure that tolerates one
 bad chunk in the first five.
 
 **Concepts to learn:** how P@K changes with K; why we report both P@3 and P@5.
@@ -1097,20 +1380,20 @@ Average P@5 = (sum of per-question P@5) / (number of questions)
 **Implementation tasks:** extend `src/metrics.py` (`k=5`), extend `scripts/metrics.py` to
 print both tables (or a combined one). Persist `evaluation/metrics/<experiment>_p5.json`.
 
-**Expected files/modules:** same as 12.6.
+**Expected files/modules:** same as 15.6.
 
 **Data/artifacts:** `evaluation/metrics/baseline_500_50_p5.json`.
 
 **Acceptance criteria:** per-question and average P@5 computed from labeled results; matches
 hand calculation for at least two questions.
 
-**Verification:** same as 12.6.
+**Verification:** same as 15.6.
 
-**Dependencies:** 12.5.
+**Dependencies:** 15.5.
 
 ---
 
-#### 12.8 Top-3 vs Top-5 vs Top-10 analysis
+#### 15.8 Top-3 vs Top-5 vs Top-10 analysis
 
 **Purpose:** understand the tradeoff between retrieving additional useful context and
 introducing irrelevant/noisy chunks as K grows. This is **separate** from P@3/P@5 (those are
@@ -1147,15 +1430,15 @@ interpretation appended to `evaluation/experiment_notes.md`.
 
 **Verification:** spot-check one question by hand against its labeled JSONL records.
 
-**Dependencies:** 12.5 (labels on all 10 ranks); 12.6/12.7 metrics.
+**Dependencies:** 15.5 (labels on all 10 ranks); 15.6/15.7 metrics.
 
 ---
 
-#### 12.9 Retrieval failure analysis
+#### 15.9 Retrieval failure analysis
 
 **Purpose:** identify and document **at least one genuine retrieval failure** — the relevant
 information was **not retrieved** or was **ranked too low**. This is the diagnostic core of
-the lab and feeds the Phase 13 improvements.
+the lab and feeds the Phase 16 improvements.
 
 **Concepts to learn — the two failures (must be kept separate):**
 
@@ -1165,8 +1448,9 @@ Generation failure: the correct information was retrieved, but a future LLM step
                     answers incorrectly.
 ```
 
-Generation is not implemented yet, so **this lab analyzes retrieval failures only**.
-No LLM is needed for this analysis.
+Generation was not implemented when this lab ran, so **this lab analyzes retrieval failures only**.
+No LLM is needed for this analysis. (Generation now exists as Phase 8; a future iteration may
+revisit this lab to classify generation failures.)
 
 **Implementation tasks:**
 - Create `evaluation/failures.md` from the template below, and fill in **at least one**
@@ -1198,11 +1482,11 @@ No LLM is needed for this analysis.
 **Verification:** re-run `scripts/inspect_results.py` for the failing question and confirm
 the documented ranks/scores match the persisted results.
 
-**Dependencies:** 12.4/12.5.
+**Dependencies:** 15.4/15.5.
 
 ---
 
-#### Phase 12 — Definition of done
+#### Phase 15 — Definition of done
 
 - `evaluation/dataset.json` exists with 20 questions (min 15), reused across experiments.
 - Top-10 retrieval results persisted for the baseline configuration
@@ -1211,13 +1495,13 @@ the documented ranks/scores match the persisted results.
 - Per-question and average **Precision@3** and **Precision@5** computed and saved.
 - Top-3 vs Top-5 vs Top-10 analysis written for at least 3 questions.
 - At least one real retrieval failure documented in `evaluation/failures.md`.
-- **Zero LLM calls were made during retrieval/run/persistence (12.1–12.4).** Relevance
-  labeling (12.5) uses an LLM judge — a deliberate deviation from the original
-  "no LLM / manual labeling" plan (see section 0 and 12.5).
+- **Zero LLM calls were made during retrieval/run/persistence (15.1–15.4).** Relevance
+  labeling (15.5) uses an LLM judge — a deliberate deviation from the original
+  "no LLM / manual labeling" plan (see section 0 and 15.5).
 
 ---
 
-### Phase 13 — Retrieval Optimization (the lab: improve with evidence)
+### Phase 16 — Retrieval Optimization (the lab: improve with evidence)
 
 **Status: DONE FOR CURRENT ITERATION — the optimization lab ran through chunking, embedding,
 hybrid (BM25/RRF), cross-encoder reranking, and a 27-question holdout. The leading
@@ -1226,7 +1510,7 @@ architecture (800/100 + MiniLM + Dense Top-20 + BM25 Top-20 + cross-encoder → 
 later validation/evaluation phase provides evidence requiring it.**
 
 **Purpose:** improve retrieval by changing **one thing at a time** and measuring each change
-against the Phase 12 baseline using the *same* evaluation questions and the *same* labeling
+against the Phase 15 baseline using the *same* evaluation questions and the *same* labeling
 methodology (LLM-as-a-Judge; the original "manual" wording was superseded — see section 0).
 We compare chunk configurations in isolated vector stores, then embedding, then hybrid
 retrieval, then reranking, pick a final configuration based on measured results, validate it
@@ -1239,14 +1523,14 @@ prompts, and retrieval at the same time.**
 
 ---
 
-#### 13.1 Baseline retrieval configuration (frozen reference)
+#### 16.1 Baseline retrieval configuration (frozen reference)
 
 **Purpose:** pin the exact baseline so every change is a controlled diff.
 
 **Implementation tasks:** document the baseline in `evaluation/experiment_notes.md`:
 
 ```text
-Baseline (Phase 12):
+Baseline (Phase 15):
   chunk_size = 500, chunk_overlap = 50
   embedding model = sentence-transformers/all-MiniLM-L6-v2 (unchanged across experiments)
   vector store = Chroma, collection "documents", L2 distance space
@@ -1256,18 +1540,18 @@ Baseline (Phase 12):
 
 **Expected files/modules:** `evaluation/experiment_notes.md` (new).
 
-**Data/artifacts:** recorded baseline config + Phase 12 metrics (P@3, P@5).
+**Data/artifacts:** recorded baseline config + Phase 15 metrics (P@3, P@5).
 
 **Acceptance criteria:** the baseline config and its P@3/P@5 numbers are written down before
 any experiment runs.
 
-**Verification:** re-read Phase 12 metric files and confirm they match the notes.
+**Verification:** re-read Phase 15 metric files and confirm they match the notes.
 
-**Dependencies:** Phase 12.
+**Dependencies:** Phase 15.
 
 ---
 
-#### 13.2 Chunk configuration experiments
+#### 16.2 Chunk configuration experiments
 
 **Purpose:** test whether chunk size/overlap changes retrieval quality, measured the same
 way as the baseline.
@@ -1279,7 +1563,7 @@ contextual but noisy); keeping all other variables fixed.
 - Candidate configurations (treat as starting points, tune if justified):
 
 ```text
-Baseline 500/50   (already measured in Phase 12)
+Baseline 500/50   (already measured in Phase 15)
 Large    800/100
 Small    300/50
 ```
@@ -1287,9 +1571,9 @@ Small    300/50
 - Extend `scripts/ingest.py` with CLI flags `--chunk-size`, `--chunk-overlap`,
   `--persist-dir` (defaults keep current behavior, so existing usage is unchanged).
 - For each candidate: write chunks using the existing `chunk_documents(chunk_size,
-  chunk_overlap)` and index into the configuration's own store (13.3).
-- Run the Phase 12 evaluation runner against each store, with the **same** `dataset.json`
-  and `top_k = 10`, then label and compute metrics exactly as in Phase 12.
+  chunk_overlap)` and index into the configuration's own store (16.3).
+- Run the Phase 15 evaluation runner against each store, with the **same** `dataset.json`
+  and `top_k = 10`, then label and compute metrics exactly as in Phase 15.
 
 **Expected files/modules:** modify `scripts/ingest.py`; new `scripts/run_experiment.py`
 (a thin orchestrator: build store → run evaluation → point labeling/metrics at the result).
@@ -1307,11 +1591,11 @@ per-config labels, per-config `evaluation/metrics/<config>_p3.json` / `_p5.json`
 --persist-dir data/chroma_db/experiments/large_800_100` then check chunk counts and run
 evaluation for that config.
 
-**Dependencies:** 13.1; Phase 12 tooling.
+**Dependencies:** 16.1; Phase 15 tooling.
 
 ---
 
-#### 13.3 Experiment-specific vector stores (isolation)
+#### 16.3 Experiment-specific vector stores (isolation)
 
 **Purpose:** guarantee each configuration is queried against its **own** index — a query must
 never touch chunks created with a different chunk configuration.
@@ -1354,11 +1638,11 @@ data/chroma_db/
 **Verification:** list chunk counts per store (`store.get()["ids"]`) and confirm the small
 config store has more chunks than the large config store.
 
-**Dependencies:** 13.2.
+**Dependencies:** 16.2.
 
 ---
 
-#### 13.4 Metric comparison
+#### 16.4 Metric comparison
 
 **Purpose:** compare configurations on the same questions with the same methodology, using
 measured numbers — never intuition.
@@ -1390,18 +1674,18 @@ small_300_50         0.800     0.680
 **Verification:** re-run `scripts/compare_configs.py`; confirm numbers match each config's
 metric files.
 
-**Dependencies:** 13.2/13.3 (results + labels for each config).
+**Dependencies:** 16.2/16.3 (results + labels for each config).
 
 ---
 
-#### 13.5 Optional advanced retrieval experiment (keyword / hybrid / reranking)
+#### 16.5 Optional advanced retrieval experiment (keyword / hybrid / reranking)
 
 **Purpose:** OPTIONAL — test one advanced retrieval method against the vector baseline. Not a
 prerequisite for completing the lab; the core plan remains valid without it.
 
 **Concepts to learn:** keyword search (BM25) for exact terms; hybrid search (vector +
 keyword combined); reranking (cross-encoder re-scoring top-20 candidates); how each would
-address specific failure patterns from 12.9.
+address specific failure patterns from 15.9.
 
 **Implementation tasks (only if pursued):**
 - Keyword: BM25 over the same chunks (e.g. `rank_bm25`) — score and rank top-10.
@@ -1420,15 +1704,15 @@ only if the experiment is done.
 metrics row.
 
 **Acceptance criteria:** if done, the method appears in the comparison table with the same
-metrics; if not done, the core Phase 13 deliverables (13.6–13.8) must still be complete.
+metrics; if not done, the core Phase 16 deliverables (16.6–16.8) must still be complete.
 
-**Verification:** same as 13.4.
+**Verification:** same as 16.4.
 
-**Dependencies:** 13.4; 12.9 failure patterns to motivate the choice.
+**Dependencies:** 16.4; 15.9 failure patterns to motivate the choice.
 
 ---
 
-#### 13.6 Final configuration selection
+#### 16.6 Final configuration selection
 
 **Purpose:** choose **one** final retrieval configuration from the measured evidence.
 
@@ -1460,11 +1744,11 @@ analysis; every field above is filled in; no field is "to be decided".
 
 **Verification:** each field maps to an actual value used in a tested configuration.
 
-**Dependencies:** 13.4.
+**Dependencies:** 16.4.
 
 ---
 
-#### 13.7 Final configuration justification
+#### 16.7 Final configuration justification
 
 **Purpose:** explain *why* the configuration was chosen in one concise engineering
 justification — backed by measured results.
@@ -1491,11 +1775,11 @@ least one failure-analysis finding; no unsupported claims ("feels better").
 
 **Verification:** every cited number can be found in `evaluation/metrics/` files.
 
-**Dependencies:** 13.6.
+**Dependencies:** 16.6.
 
 ---
 
-#### 13.8 Reproducibility / regression evaluation
+#### 16.8 Reproducibility / regression evaluation
 
 **Purpose:** prove the final configuration is reproducible and lock it in as the new default
 so future changes are measured against it.
@@ -1520,11 +1804,11 @@ P@3/P@5 (within floating-point tolerance); config defaults match the final choic
 **Verification:** delete/re-create `data/chroma_db/experiments/<final>` and re-run the full
 sequence; compare metrics.
 
-**Dependencies:** 13.6/13.7.
+**Dependencies:** 16.6/16.7.
 
 ---
 
-#### Phase 13 — Definition of done
+#### Phase 16 — Definition of done
 
 - Baseline vs at least one alternative chunk configuration (prefer three) compared with the
   **same** 20 questions, same embedding model, same retrieval method.
@@ -1535,7 +1819,7 @@ sequence; compare metrics.
   (`evaluation/metrics/comparison.md` — deviation: the originally planned
   `experiments/final_configuration.md` was folded into `comparison.md`).
 - A regression run proves the final configuration is reproducible.
-- Any optional advanced method (13.5) is clearly additive — the core lab is complete without
+- Any optional advanced method (16.5) is clearly additive — the core lab is complete without
   it.
 
 ---
@@ -1543,7 +1827,7 @@ sequence; compare metrics.
 ## 10. Evaluation strategy (the single source of truth)
 
 **Primary lab methodology — LLM-as-a-Judge relevance labeling + Precision@K / Hit@K
-(Phases 12–13):**
+(Phases 15–16):**
 - **Fixed evaluation dataset** (`evaluation/dataset.json`): 20 questions (Q01–Q20, one a
   deliberate negative) covering different information types in the PDF; reused by **every**
   experiment. A second, independent holdout (`evaluation/holdout_dataset_v1.json`, 27
@@ -1589,27 +1873,39 @@ is in scope.
 |---|---|---|---|
 | Empty/garbled PDF text | pages exist, text is blank | scanned PDF (no text layer) / OCR needed | Phase 3 |
 | Bad retrieval | right answer but wrong chunks shown | bad chunking, wrong embedding model, K too small | Phases 4/5/7 → 12–13 |
-| Right chunk ranked low | it exists but not in top-K | chunk boundary cuts the answer, K too small | Phase 12 (document it) → 13 (chunk experiments; optional rerank 13.5) |
-| Relevant chunk missing entirely | not found in top-10 | retrieval failure | Phase 12.9 → 13 |
-| Scores look inverted | "similarity" gets smaller | Chroma returns **L2 distance**, lower = better | Phases 6/12.2 |
-| Evaluation not reproducible | numbers change every run | different questions/stores between runs | Phases 12.1/12.3 |
+| Right chunk ranked low | it exists but not in top-K | chunk boundary cuts the answer, K too small | Phase 15 (document it) → 16 (chunk experiments; optional rerank 16.5) |
+| Relevant chunk missing entirely | not found in top-10 | retrieval failure | Phase 15.9 → 16 |
+| Scores look inverted | "similarity" gets smaller | Chroma returns **L2 distance**, lower = better | Phases 6/15.2 |
+| Evaluation not reproducible | numbers change every run | different questions/stores between runs | Phases 15.1/15.3 |
 | LLM ignores context | confident wrong answer | weak prompt, too much noise in context | Phase 8 (prompt design) |
 | Hallucination on missing info | invented facts | no refusal instruction in prompt | Phase 8 |
-| Duplicated data | same chunk retrieved many times / stale answers | re-indexing without clearing the store; querying wrong experiment store | Phase 6 / 13.3 |
+| Duplicated data | same chunk retrieved many times / stale answers | re-indexing without clearing the store; querying wrong experiment store | Phase 6 / 16.3 |
 | Citations wrong | [1] points at wrong page | metadata lost, marker resolution bug | Phase 9 |
-| UI breaks but CLI works | only Gradio fails | RAG logic leaked into the UI | Phase 11 |
+| UI breaks but CLI works | only the client fails | RAG logic leaked into the UI/API | Phase 10.5/14 |
 
 ---
 
-## 12. Advanced improvement roadmap (after baseline)
+## 12. Future research (NOT part of the current execution plan)
 
-The retrieval lab (Phase 13) covers **chunk configuration experiments** as the primary
-optimization, plus **optional** keyword / hybrid / reranking experiments (13.5). Ideas beyond
-the lab's scope — better embedding models, query rewriting, metadata filtering,
-multi-document retrieval, context compression, advanced evaluation frameworks (e.g. `ragas`),
-streaming — remain future work, **always measured against the Phase 12 baseline, one change
-at a time**. Never change chunking, embeddings, retrieval, and (later) prompts in the same
-experiment.
+The retrieval lab (Phases 15–16) covered chunk configuration experiments plus hybrid +
+cross-encoder reranking (16.5) and is **complete for the current iteration** — the leading
+architecture is **FROZEN**. The forward execution plan is Phases 10–14 (pipeline, FastAPI,
+safety, confidence, end-to-end evaluation, optional UI).
+
+The ideas below are **explicitly future research, NOT part of the current hackathon
+execution plan.** They must not delay Phases 10–14, and any future retrieval/ranking work
+must be validated by **end-to-end impact** (not just P@K), one change at a time:
+
+- Stronger **answerability / usefulness** reranker (semantic relevance ≠ answer usefulness —
+  the measured limitation of the current frozen reranker).
+- **Hard-negative mining** for a better relevance judge / reranker training signal.
+- A better **usefulness classifier** and **query-aware ranking**.
+- A **larger diagnostic dataset** (the current 20 + 27 holdout are small).
+- Stronger **domain-specific reranker** (e.g. biomedical cross-encoders).
+- **Additional corpus resources** beyond the single NICE NG217 PDF.
+- Any other retrieval/ranking improvement — always measured against the frozen baseline
+  (Phase 15) and the end-to-end Phase 13 evaluation, one change at a time. Never change
+  chunking, embeddings, retrieval, and prompts in the same experiment.
 
 ---
 
@@ -1649,10 +1945,10 @@ We do **not** start the next phase until the current one is verified.
 
 ## 14. Ready to begin
 
-**Current state:** Phases 1–7, 12, and 13 are **DONE** (13 done for the current iteration).
-The leading retrieval architecture is **VALIDATED / FROZEN FOR NOW** — retrieval
-optimization is paused. The next engineering phase is **Phase 8 — Generation** (NOT
-STARTED), followed by Phases 9–11 (Sources, Pipeline, Gradio).
+**Current state:** Phases 1–7, 8, 9, 10, 10.5, 15, and 16 are **DONE** (8/9/10/10.5/16 done
+for the current iteration). The leading retrieval architecture is **VALIDATED / FROZEN FOR
+NOW** — retrieval optimization is paused. The next engineering phase is **Phase 11 —
+Safety / guardrails**, then Phases 12–14.
 
 > This section was originally written before the evaluation lab. The lab has been executed;
 > the section 0 phase-status table and `evaluation/metrics/comparison.md` are the
@@ -1663,28 +1959,31 @@ STARTED), followed by Phases 9–11 (Sources, Pipeline, Gradio).
 ## 15. Next Implementation Sequence
 
 This is the **historical** execution order used for the retrieval evaluation / optimization
-lab. It is preserved for reference; the lab is complete. The **forward** sequence from here
-is **Phase 8 — Generation**, then Phases 9–11, then any post-Generation evaluation.
+lab (Phases 15–16; renumbered from the original 12–13). It is preserved for reference; the
+lab is complete. The **forward** sequence: **Phase 10 — End-to-end RAG pipeline** (done),
+**Phase 10.5 — FastAPI** (done), then Phases 11 (Safety), 12 (Confidence), 13 (End-to-End
+Evaluation), and 14 (UI/Client, optional).
 
-1. **12.1 — Evaluation dataset.** `evaluation/dataset.json` (20 questions, IDs `Q01`…).
-2. **12.2/12.3 — Runner + persistence.** `src/evaluation.py`, `scripts/run_evaluation.py`;
+1. **15.1 — Evaluation dataset.** `evaluation/dataset.json` (20 questions, IDs `Q01`…).
+2. **15.2/15.3 — Runner + persistence.** `src/evaluation.py`, `scripts/run_evaluation.py`;
    `evaluation/results/baseline_500_50_top10.jsonl` (200 records).
-3. **12.4 — Inspection.** `scripts/inspect_results.py`.
-4. **12.5 — LLM-as-a-Judge labeling** (deviation from the original "manual" step): `src/judge.py`,
+3. **15.4 — Inspection.** `scripts/inspect_results.py`.
+4. **15.5 — LLM-as-a-Judge labeling** (deviation from the original "manual" step): `src/judge.py`,
    `scripts/label_results.py`; labels written to `<name>_labeled.jsonl` derivatives.
-5. **12.6/12.7 — Metrics.** `src/metrics.py`, `scripts/metrics.py`; Precision@3 and Precision@5.
-6. **12.8 — Top-K analysis.** `scripts/analyze_topk.py`.
-7. **12.9 — Failure analysis.** `evaluation/failures.md`.
-8. **13.1 — Baseline config.** Recorded in `evaluation/experiment_notes.md`.
-9. **13.2/13.3 — Chunk experiments + isolation.** `data/chroma_db/experiments/{large_800_100,
+5. **15.6/15.7 — Metrics.** `src/metrics.py`, `scripts/metrics.py`; Precision@3 and Precision@5.
+6. **15.8 — Top-K analysis.** `scripts/analyze_topk.py`.
+7. **15.9 — Failure analysis.** `evaluation/failures.md`.
+8. **16.1 — Baseline config.** Recorded in `evaluation/experiment_notes.md`.
+9. **16.2/16.3 — Chunk experiments + isolation.** `data/chroma_db/experiments/{large_800_100,
    large_500_75}` (plus the 500/50 baseline store).
-10. **13.4 — Comparison.** `evaluation/metrics/comparison.md`.
-11. **13.5 — Advanced experiments (implemented).** Hybrid retrieval (dense + BM25 + RRF),
+10. **16.4 — Comparison.** `evaluation/metrics/comparison.md`.
+11. **16.5 — Advanced experiments (implemented).** Hybrid retrieval (dense + BM25 + RRF),
     then cross-encoder reranking over the hybrid candidate pool.
-12. **13.6/13.7 — Final configuration + justification.** See the reranking section of
+12. **16.6/16.7 — Final configuration + justification.** See the reranking section of
     `evaluation/metrics/comparison.md`.
-13. **13.8 — Validation.** 27-question holdout (`evaluation/holdout_dataset_v1.json`) run
+13. **16.8 — Validation.** 27-question holdout (`evaluation/holdout_dataset_v1.json`) run
     against the frozen architecture; see the holdout section of `comparison.md`.
 
-After the lab: **Phase 8 — Generation** (next), then Phases 9–11, then any post-Generation
-evaluation from the complementary measures in section 10.
+After the lab: **Phase 8 — Generation** (done), then **Phase 9 — Sources/citations** (done),
+then Phases 10–14 (the forward sequence above), then any post-Generation evaluation from
+the complementary measures in section 10.

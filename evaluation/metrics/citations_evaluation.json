@@ -1,0 +1,18 @@
+{
+  "n_questions": 47,
+  "n_claims": 92,
+  "n_answerable_claims": 88,
+  "n_no_evidence_claims": 1,
+  "n_claims_with_citation": 88,
+  "coverage": 1.0,
+  "n_citations": 130,
+  "citations_by_support": {
+    "supported": 111,
+    "partially_supported": 19
+  },
+  "support_total_judged": 130,
+  "traceability_questions_valid": 47,
+  "questions_with_validation_error": 0,
+  "traceability_citations_in_retrieved": 130,
+  "traceability_citations_total": 130
+}

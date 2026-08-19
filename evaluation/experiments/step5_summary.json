@@ -1,0 +1,48 @@
+{
+  "records": 254,
+  "BENCH": {
+    "n": 94,
+    "class": {
+      "DIRECT_ANSWER": 19,
+      "SUPPORTING_DETAIL": 9,
+      "RATIONALE": 26,
+      "WRONG_SUBTOPIC": 13,
+      "RELEVANT_NOT_ANSWERING": 8,
+      "SCOPE_MISMATCH": 17,
+      "OTHER": 1,
+      "INDEX_TOC": 1
+    },
+    "usefulness": {
+      "high": 21,
+      "medium": 10,
+      "low": 63
+    },
+    "existing_relevance": {
+      "relevant": 27,
+      "not_relevant": 67
+    }
+  },
+  "HOLD": {
+    "n": 160,
+    "class": {
+      "RATIONALE": 52,
+      "SCOPE_MISMATCH": 17,
+      "SUPPORTING_DETAIL": 14,
+      "WRONG_SUBTOPIC": 23,
+      "RELEVANT_NOT_ANSWERING": 20,
+      "DIRECT_ANSWER": 32,
+      "OTHER": 1,
+      "INDEX_TOC": 1
+    },
+    "usefulness": {
+      "medium": 29,
+      "low": 98,
+      "high": 33
+    },
+    "existing_relevance": {
+      "not_relevant": 100,
+      "relevant": 60
+    }
+  },
+  "relevant_not_direct_answer": 41
+}

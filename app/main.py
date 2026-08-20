@@ -412,15 +412,15 @@ _UI_CORPUS_MEASUREMENT = (
 
 def _ui_submit(question: str, request: gr.Request):
     if not question or not question.strip():
-        return "", "", "", "", ""
+        return "", "", "", "", "", ""
     try:
         response = asyncio.run(
             _guarded_query(question.strip(), _client_ip(request))
         )
     except PublicQueryError as error:
-        return error.detail, "", "", "", ""
+        return error.detail, "", "", "", "", ""
     except Exception:  # noqa: BLE001
-        return "The question could not be answered. Please try again later.", "", "", "", ""
+        return "The question could not be answered. Please try again later.", "", "", "", "", ""
     if response.rating.band == "refused":
         band = ""
         explanation = (
@@ -443,6 +443,7 @@ def _ui_submit(question: str, request: gr.Request):
         explanation,
         _citation_markdown(response),
         response.request_id,
+        "",
     )
 
 
@@ -483,7 +484,7 @@ def build_demo():
             helpful = gr.Button("👍 Helpful")
             unhelpful = gr.Button("👎 Not helpful")
         feedback_status = gr.Markdown()
-        outputs = [answer, band, band_explanation, citations, request_id]
+        outputs = [answer, band, band_explanation, citations, request_id, feedback_status]
         submit.click(_ui_submit, inputs=question, outputs=outputs)
         helpful.click(
             lambda request_id: _ui_feedback(request_id, True),

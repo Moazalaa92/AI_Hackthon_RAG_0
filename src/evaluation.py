@@ -3,19 +3,14 @@
 import json
 from pathlib import Path
 
-from langchain_chroma import Chroma
-
 from src.config import EVAL_TOP_K
-from src.embeddings import DEFAULT_EMBEDDING_MODEL, get_embeddings
+from src.embeddings import DEFAULT_EMBEDDING_MODEL
+from src.vectorstore import get_vectorstore
 
 
 def _get_vectorstore(persist_dir, model_name=DEFAULT_EMBEDDING_MODEL):
     """Chroma store for a given persist directory (mirrors src.vectorstore)."""
-    return Chroma(
-        collection_name="documents",
-        persist_directory=str(persist_dir),
-        embedding_function=get_embeddings(model_name),
-    )
+    return get_vectorstore(persist_dir, model_name=model_name)
 
 
 def run_retrieval(dataset, persist_dir, top_k=EVAL_TOP_K, model_name=DEFAULT_EMBEDDING_MODEL):
@@ -57,5 +52,4 @@ def write_results(records, path):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        for record in records:
-            f.write(json.dumps(record) + "\n")
+        f.writelines(json.dumps(record) + "\n" for record in records)

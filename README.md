@@ -29,7 +29,7 @@ text** that supports it — or the system refuses rather than invent.
 | **Citations / traceability** | **IMPLEMENTED / VALIDATED** |
 | **End-to-end pipeline** | **DONE** (Phase 10 — `src/pipeline.py`) |
 | **FastAPI API** | **DONE** (Phase 10.5 — `app/main.py`) |
-| **Safety / guardrails** | **IN PROGRESS** (Phase 11 — being designed & evaluated) |
+| **Safety / guardrails** | **IMPLEMENTED** (Phase 11) |
 | **Confidence / observability** | NEXT (Phase 12) |
 | **End-to-end evaluation** | NEXT (Phase 13) |
 | **UI / client** | OPTIONAL / LATER (Phase 14, Gradio is *not* the production backend) |
@@ -529,9 +529,7 @@ The API provides:
 
 ---
 
-## Safety / guardrails (Phase 11 — IN PROGRESS)
-
-**Safety is being designed and evaluated — it is not implemented yet.** Do not claim it is.
+## Safety / guardrails (Phase 11 — implemented)
 
 The approved direction is a minimal, explicit, explainable three-way policy:
 
@@ -543,8 +541,25 @@ The approved direction is a minimal, explicit, explainable three-way policy:
   the requested answer.")
 
 Design principles in scope: fail closed (never silently assume a request is safe), keep it
-small (no policy engines, no conversation memory, no external safety APIs), and evaluate
-the policy with a dedicated safety dataset (false positives *and* false negatives).
+small (no policy engines, no conversation memory), and evaluate the policy with a dedicated
+safety dataset (false positives *and* false negatives).
+
+The pre-retrieval intent gate has two layers:
+
+- **Layer 1 (always on):** a deterministic, small gate matching first-person references,
+  age vignettes, singular individual references, and selected third-person clinical
+  narratives. It is deliberately not a topic matcher, so general questions about
+  valproate, driving, dosing, swimming, surgery, or patients remain NORMAL.
+- **Layer 2 (optional):** an LLM intent classifier runs only when layer 1 returns NORMAL.
+  Set `SAFETY_INTENT_LLM_ENABLED=1` in the deployed environment to enable it. It is
+  OFF by default, retries once on provider failure, and preserves the layer-1 result if
+  both attempts fail. The returned `SafetyResult.reason` identifies the deciding layer.
+
+For public deployment, call `src.warmup.warm_up(persist_dir=...)` from the API startup
+hook to load the cached embedding model, Chroma handle, and cross-encoder before serving
+the first request. Embeddings, vectorstore handles, and rerankers are cached once per
+process and keyed by their construction parameters; lazy initialization is locked for
+concurrent requests.
 
 Future phases: **Confidence / observability** (Phase 12), **End-to-end evaluation**
 (Phase 13), optional **UI / client** (Phase 14).
@@ -583,9 +598,9 @@ A 60-second version of the whole project, answers to the questions a reviewer wi
 10. **What are the limitations?** Top-3/top-5 precision density is the retrieval weakness;
     Generation has occasional multi-part omissions, neighbor-recommendation conflation, and
     over-abstention; citation support is 90.1% under the LLM judge; all labels are
-    LLM-judged, not clinical validation; safety guardrails are not yet implemented.
-11. **What is next?** Safety/guardrails (in progress), then confidence/observability, then
-    end-to-end evaluation, then an optional UI.
+    LLM-judged, not clinical validation; safety guardrails are not a clinical guarantee.
+11. **What is next?** Confidence/observability, then end-to-end evaluation, then an
+    optional UI.
 
 **The central story: "Build → Measure → Diagnose → Improve → Validate → Integrate."**
 
@@ -826,4 +841,5 @@ downloaded from Hugging Face on first use.
 ---
 
 *Retrieval metrics are LLM-judged evidence, not clinical validation. Safety guardrails are
-in progress and not yet implemented. See `PLAN.md` for the full plan and phase status.*
+implemented but are not a clinical guarantee. See `PLAN.md` for the full plan and phase
+status.*

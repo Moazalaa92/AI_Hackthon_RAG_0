@@ -17,18 +17,22 @@ at ~1/(k+1) (the Q09 failure: BM25-only relevant chunks fused to ranks
 (question, chunk) score replaces RRF as the ranking mechanism.
 """
 
+from threading import RLock
+
 from sentence_transformers import CrossEncoder
 
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 _rerankers = {}
+_reranker_lock = RLock()
 
 
 def get_reranker(model_name=CROSS_ENCODER_MODEL):
     """Return a lazily-loaded, shared CrossEncoder instance per model name."""
-    if model_name not in _rerankers:
-        _rerankers[model_name] = CrossEncoder(model_name, max_length=512)
-    return _rerankers[model_name]
+    with _reranker_lock:
+        if model_name not in _rerankers:
+            _rerankers[model_name] = CrossEncoder(model_name, max_length=512)
+        return _rerankers[model_name]
 
 
 def zscore(values):

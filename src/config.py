@@ -10,6 +10,9 @@ load_dotenv()
 LLM_API_KEY = os.getenv("LLM_API_KEY")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL")
 LLM_MODEL = os.getenv("LLM_MODEL")
+SAFETY_INTENT_LLM_ENABLED = os.getenv(
+    "SAFETY_INTENT_LLM_ENABLED", "0"
+).strip().lower() in {"1", "true", "yes", "on"}
 
 DATA_DIR = os.getenv("DATA_DIR", "data")
 CHROMA_DB_DIR = os.getenv("CHROMA_DB_DIR", os.path.join(DATA_DIR, "chroma_db"))

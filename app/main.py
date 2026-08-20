@@ -402,6 +402,14 @@ def _citation_markdown(response: AskResponse) -> str:
     return "\n\n---\n\n".join(lines) or "No citations were returned."
 
 
+_UI_CORPUS_MEASUREMENT = (
+    "Corpus-level measurement on the 44-question judged eval set "
+    "(not this answer): 75.0% judged strictly correct "
+    "(95% CI 60.6–85.4%), 20.5% partially correct, 4.5% incorrect, "
+    "and 100% grounded in retrieved text."
+)
+
+
 def _ui_submit(question: str, request: gr.Request):
     if not question or not question.strip():
         return "", "", "", "", ""
@@ -418,8 +426,14 @@ def _ui_submit(question: str, request: gr.Request):
         explanation = (
             "No evidence-support rating applies because this request was refused."
         )
+    elif response.rating.band == "low":
+        band = "Citations incomplete — treat with caution."
+        explanation = (
+            "Some claims are not cited to a guideline page. "
+            "This describes citation completeness, not accuracy."
+        )
     else:
-        band = response.rating.band
+        band = "Supported: every claim is cited to a guideline page."
         explanation = (
             "This band describes support from the retrieved evidence, not accuracy."
         )
@@ -443,7 +457,8 @@ def build_demo():
     with gr.Blocks(title="NICE NG217 Grounded RAG") as demo:
         gr.Markdown(
             "# NICE NG217 grounded answers\n"
-            "Informational only, based on NICE NG217, not individualised medical advice."
+            "Informational only, based on NICE NG217, not individualised medical advice.\n\n"
+            f"{_UI_CORPUS_MEASUREMENT}"
         )
         question = gr.Textbox(
             label="Question",

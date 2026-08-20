@@ -545,28 +545,28 @@ The shareable Docker Space runs one FastAPI process with the Gradio UI mounted
 at `/`, on port 7860. It warms the embedding, Chroma, and reranker handles at
 startup, limits concurrent pipeline work to two requests, caches repeated
 normalised questions, and exposes `/ready`, `/version`, `/feedback`, and `/ask`.
-The UI shows support bands only; a band describes support from retrieved
-evidence, not answer accuracy. The permanent disclaimer says that the service
-is informational, based on NICE NG217, and not individualised medical advice.
+The UI collapses the raw `high` and `medium` API bands into one evidence
+property: **Supported: every claim is cited to a guideline page.** The raw
+`low` band is shown as **Citations incomplete — treat with caution.** These are
+not accuracy tiers; the API still returns the four raw bands unchanged. The
+corpus-level measurement shown once in the UI is documented in the
+[rating calibration evidence](evaluation/metrics/rating_calibration_v1.md).
+The permanent disclaimer says that the service is informational, based on NICE
+NG217, and not individualised medical advice.
 
 Deployment steps:
 
 1. Create a new Hugging Face Space and select the Docker SDK.
-2. Add `LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` as Space secrets/variables:
+2. Add these Space secrets/variables:
 
 ```text
 LLM_API_KEY=<Space secret>
 LLM_BASE_URL=https://openrouter.ai/api/v1
 LLM_MODEL=deepseek/deepseek-v4-flash
-```
-
-3. Set the safety intent layer on the Space:
-
-```text
 SAFETY_INTENT_LLM_ENABLED=1
 ```
 
-4. Push this repository branch to the Space. The `Dockerfile` installs the pinned
+3. Push this repository branch to the Space. The `Dockerfile` installs the pinned
 dependencies and runs the documented 800/100 ingestion during the image build,
 so the 444-chunk Chroma store is included in the image without storing a key in
 the repository. Optional controls are documented in `.env.example`, including

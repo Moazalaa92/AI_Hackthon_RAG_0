@@ -1,8 +1,8 @@
-"""Deterministic evidence-support bands for public answers.
+"""Deterministic evidence signals and raw bands for public answers.
 
 This module is deliberately offline and rule-based. It does not assess
-clinical correctness; it summarizes observable retrieval, citation, and safety
-signals into a conservative support band.
+clinical correctness or define UI accuracy tiers; it summarizes observable
+retrieval, citation, and safety signals into raw bands for the API.
 """
 
 from dataclasses import dataclass
@@ -11,8 +11,8 @@ from src.pipeline import Answer
 from src.safety import NORMAL, SafetyResult
 from src.sources import is_refusal_claim, split_claims
 
-# Provisional calibration values. Phase B may override these through the
-# function arguments without changing the rule table.
+# Provisional, uncalibrated thresholds. They are not used for UI display
+# tiering, but remain overridable for a future, larger judged set.
 T_TOP1 = 1.0
 T_MARGIN = 0.5
 

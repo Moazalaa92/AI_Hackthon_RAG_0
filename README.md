@@ -573,8 +573,11 @@ the repository. Optional controls are documented in `.env.example`, including
 the per-IP hourly limit, global daily cap, timeout, cache size, and SQLite path.
 
 Feedback and request logs use SQLite under `data/` by default. A Space's
-filesystem is ephemeral, so this is suitable for calibration during a session;
-use a persistent external backend for production history.
+filesystem and its SQLite feedback database are ephemeral, so this is suitable
+for calibration during a session; use a persistent external backend for
+production history. The per-IP limiter trusts the first hop of
+`X-Forwarded-For`, which is appropriate for the Hugging Face platform proxy;
+deployments with a different proxy topology must preserve that trust boundary.
 
 ## Safety / guardrails (Phase 11 — implemented)
 

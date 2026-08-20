@@ -52,6 +52,17 @@ class QueryTimeout(Exception):
     """Raised when the request queue or pipeline exceeds its timeout."""
 
 
+class PublicQueryError(Exception):
+    """A safe error that can be rendered by either transport surface."""
+
+    def __init__(self, status_code: int, code: str, detail: str, retry_after=None):
+        super().__init__(detail)
+        self.status_code = status_code
+        self.code = code
+        self.detail = detail
+        self.retry_after = retry_after
+
+
 class RateLimiter:
     """Small in-process fixed-window limiter for one Space process."""
 
@@ -89,6 +100,17 @@ _question_cache = OrderedDict()
 
 def _normalise_question(question: str) -> str:
     return " ".join(question.casefold().split())
+
+
+def _client_ip(request) -> str:
+    headers = getattr(request, "headers", {}) or {}
+    forwarded = headers.get("x-forwarded-for")
+    if forwarded:
+        first_hop = forwarded.split(",", 1)[0].strip()
+        if first_hop:
+            return first_hop
+    client = getattr(request, "client", None)
+    return getattr(client, "host", None) or "unknown"
 
 
 def _query_sync(question: str):
@@ -206,6 +228,83 @@ def _to_response(
     )
 
 
+async def _guarded_query(question: str, ip: str) -> AskResponse:
+    """Run one question through the shared API/UI protection path."""
+    request_id = uuid.uuid4().hex
+    retry_after = _rate_limiter.check(ip)
+    if retry_after is not None:
+        raise PublicQueryError(
+            429,
+            "rate_limited",
+            "Question limit reached. Please try again later.",
+            retry_after,
+        )
+    if not getattr(app.state, "ready", False):
+        raise PublicQueryError(
+            503,
+            "not_ready",
+            "The service is still warming up.",
+        )
+
+    started = time.perf_counter()
+    error_code = None
+    try:
+        cached = _cached_query(question)
+        if cached is None:
+            cached = await _query_with_timeout(question)
+            _store_cached_query(question, cached)
+        result, safety, rating = cached
+        response = _to_response(request_id, result, safety, rating)
+    except asyncio.TimeoutError as exc:
+        error_code = "timeout"
+        raise PublicQueryError(
+            504,
+            "timeout",
+            "The question took too long to process. Please try again.",
+        ) from exc
+    except QueryTimeout as exc:
+        error_code = "timeout"
+        raise PublicQueryError(
+            504,
+            "timeout",
+            "The service is busy. Please try again.",
+        ) from exc
+    except Exception as exc:
+        error_code = "internal_error"
+        raise PublicQueryError(
+            500,
+            "internal_error",
+            "The question could not be answered. Please try again later.",
+        ) from exc
+    finally:
+        latency_ms = (time.perf_counter() - started) * 1000
+        try:
+            if "response" in locals():
+                log_request(
+                    request_id=request_id,
+                    ip=ip,
+                    question=question,
+                    answer=response.answer,
+                    band=response.rating.band,
+                    signals=response.rating.signals.model_dump(),
+                    latency_ms=latency_ms,
+                )
+            else:
+                log_request(
+                    request_id=request_id,
+                    ip=ip,
+                    question=question,
+                    answer="",
+                    band="error",
+                    signals={},
+                    latency_ms=latency_ms,
+                    error=error_code or "request_failed",
+                )
+        except Exception:  # noqa: BLE001, S110
+            pass
+    return response
+
+
 def _error(status_code: int, code: str, detail: str, retry_after: int | None = None):
     headers = {"Retry-After": str(retry_after)} if retry_after else None
     return JSONResponse(
@@ -266,76 +365,15 @@ def version() -> VersionResponse:
     },
 )
 async def ask(request: Request, body: AskRequest):
-    request_id = uuid.uuid4().hex
-    ip = request.client.host if request.client else "unknown"
-    retry_after = _rate_limiter.check(ip)
-    if retry_after is not None:
-        return _error(
-            429,
-            "rate_limited",
-            "Question limit reached. Please try again later.",
-            retry_after,
-        )
-    if not getattr(request.app.state, "ready", False):
-        return _error(503, "not_ready", "The service is still warming up.")
-
-    started = time.perf_counter()
-    error_code = None
     try:
-        cached = _cached_query(body.question)
-        if cached is None:
-            cached = await _query_with_timeout(body.question)
-            _store_cached_query(body.question, cached)
-        result, safety, rating = cached
-        response = _to_response(request_id, result, safety, rating)
-    except asyncio.TimeoutError:
-        error_code = "timeout"
+        return await _guarded_query(body.question, _client_ip(request))
+    except PublicQueryError as error:
         return _error(
-            504,
-            "timeout",
-            "The question took too long to process. Please try again.",
+            error.status_code,
+            error.code,
+            error.detail,
+            error.retry_after,
         )
-    except QueryTimeout:
-        error_code = "timeout"
-        return _error(
-            504,
-            "timeout",
-            "The service is busy. Please try again.",
-        )
-    except Exception:  # noqa: BLE001
-        error_code = "internal_error"
-        return _error(
-            500,
-            "internal_error",
-            "The question could not be answered. Please try again later.",
-        )
-    finally:
-        latency_ms = (time.perf_counter() - started) * 1000
-        try:
-            if "response" in locals():
-                log_request(
-                    request_id=request_id,
-                    ip=ip,
-                    question=body.question,
-                    answer=response.answer,
-                    band=response.rating.band,
-                    signals=response.rating.signals.model_dump(),
-                    latency_ms=latency_ms,
-                )
-            else:
-                log_request(
-                    request_id=request_id,
-                    ip=ip,
-                    question=body.question,
-                    answer="",
-                    band="error",
-                    signals={},
-                    latency_ms=latency_ms,
-                    error=error_code or "request_failed",
-                )
-        except Exception:  # noqa: BLE001, S110
-            pass
-    return response
 
 
 @app.post("/feedback", response_model=FeedbackResponse)
@@ -364,37 +402,27 @@ def _citation_markdown(response: AskResponse) -> str:
     return "\n\n---\n\n".join(lines) or "No citations were returned."
 
 
-def _ui_submit(question: str):
+def _ui_submit(question: str, request: gr.Request):
     if not question or not question.strip():
         return "", "", "", "", ""
     try:
-        request_id = uuid.uuid4().hex
-        started = time.perf_counter()
-        result, safety, rating = _query_sync(question.strip())
-        response = _to_response(request_id, result, safety, rating)
-        log_request(
-            request_id=request_id,
-            ip="gradio",
-            question=question.strip(),
-            answer=response.answer,
-            band=response.rating.band,
-            signals=response.rating.signals.model_dump(),
-            latency_ms=(time.perf_counter() - started) * 1000,
+        response = asyncio.run(
+            _guarded_query(question.strip(), _client_ip(request))
         )
+    except PublicQueryError as error:
+        return error.detail, "", "", "", ""
     except Exception:  # noqa: BLE001
-        return (
-            "The question could not be answered. Please try again later.",
-            "",
-            "",
-            "",
-            "",
+        return "The question could not be answered. Please try again later.", "", "", "", ""
+    if response.rating.band == "refused":
+        band = ""
+        explanation = (
+            "No evidence-support rating applies because this request was refused."
         )
-    band = "" if response.rating.band == "refused" else response.rating.band
-    explanation = (
-        ""
-        if not band
-        else "This band describes support from the retrieved evidence, not accuracy."
-    )
+    else:
+        band = response.rating.band
+        explanation = (
+            "This band describes support from the retrieved evidence, not accuracy."
+        )
     return (
         response.answer,
         band,

@@ -8,7 +8,7 @@ signals into a conservative support band.
 from dataclasses import dataclass
 
 from src.pipeline import Answer
-from src.safety import INSUFFICIENT_EVIDENCE, NORMAL, SafetyResult
+from src.safety import NORMAL, SafetyResult
 from src.sources import is_refusal_claim, split_claims
 
 # Provisional calibration values. Phase B may override these through the
@@ -87,11 +87,7 @@ def rate_answer(
 ) -> RatingResult:
     """Assign the contract band to an answer and its safety result."""
     signals = _signals(answer, safety)
-    if (
-        safety.classification != NORMAL
-        or safety.classification == INSUFFICIENT_EVIDENCE
-        or _is_refusal_answer(answer)
-    ):
+    if safety.classification != NORMAL or _is_refusal_answer(answer):
         return RatingResult(
             band="refused",
             signals=signals,
@@ -118,8 +114,7 @@ def rate_answer(
         and signals["top1_top3_margin"] >= margin_threshold
     )
     if (
-        answer.citations_valid is True
-        and signals["claim_citation_coverage"] == 1.0
+        signals["claim_citation_coverage"] == 1.0
         and high_score
         and (high_margin or signals["dual_retrieval"])
     ):

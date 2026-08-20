@@ -1,3 +1,12 @@
+---
+title: NICE NG217 Grounded RAG
+emoji: ⚕️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # Hackathon Lectures — Grounded RAG over a NICE Epilepsy Guideline (NG217)
 
 A **retrieval-augmented generation (RAG)** question-answering system over the clinical
@@ -476,9 +485,10 @@ python scripts/ask.py "Which medicine is offered as first-line treatment for abs
 
 ## FastAPI API (Phase 10.5 — `app/main.py`)
 
-A thin HTTP layer over `src.pipeline.query()`. The API is intentionally minimal and
-**stateless**: no auth, no streaming, no conversation memory. All RAG logic stays in the
-pipeline; the routes only transport requests and responses.
+A thin HTTP layer over `src.pipeline.query()`. The API is intentionally stateless with no
+conversation memory. It adds bounded in-process concurrency, readiness, rate limiting,
+question caching, and SQLite calibration logging for the public Space. All RAG logic
+stays in the pipeline.
 
 ```text
 Client → FastAPI → RAG pipeline → structured response
@@ -529,6 +539,43 @@ The API provides:
 
 ---
 
+## Public Space app (Phase A)
+
+The shareable Docker Space runs one FastAPI process with the Gradio UI mounted
+at `/`, on port 7860. It warms the embedding, Chroma, and reranker handles at
+startup, limits concurrent pipeline work to two requests, caches repeated
+normalised questions, and exposes `/ready`, `/version`, `/feedback`, and `/ask`.
+The UI shows support bands only; a band describes support from retrieved
+evidence, not answer accuracy. The permanent disclaimer says that the service
+is informational, based on NICE NG217, and not individualised medical advice.
+
+Deployment steps:
+
+1. Create a new Hugging Face Space and select the Docker SDK.
+2. Add `LLM_API_KEY`, `LLM_BASE_URL`, and `LLM_MODEL` as Space secrets/variables:
+
+```text
+LLM_API_KEY=<Space secret>
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=deepseek/deepseek-v4-flash
+```
+
+3. Set the safety intent layer on the Space:
+
+```text
+SAFETY_INTENT_LLM_ENABLED=1
+```
+
+4. Push this repository branch to the Space. The `Dockerfile` installs the pinned
+dependencies and runs the documented 800/100 ingestion during the image build,
+so the 444-chunk Chroma store is included in the image without storing a key in
+the repository. Optional controls are documented in `.env.example`, including
+the per-IP hourly limit, global daily cap, timeout, cache size, and SQLite path.
+
+Feedback and request logs use SQLite under `data/` by default. A Space's
+filesystem is ephemeral, so this is suitable for calibration during a session;
+use a persistent external backend for production history.
+
 ## Safety / guardrails (Phase 11 — implemented)
 
 The approved direction is a minimal, explicit, explainable three-way policy:
@@ -554,6 +601,12 @@ The pre-retrieval intent gate has two layers:
   Set `SAFETY_INTENT_LLM_ENABLED=1` in the deployed environment to enable it. It is
   OFF by default, retries once on provider failure, and preserves the layer-1 result if
   both attempts fail. The returned `SafetyResult.reason` identifies the deciding layer.
+
+The deterministic gate is deliberately conservative. An impersonal age-scoped question
+such as “What is first-line treatment for a 5-year-old with absence seizures?” is refused
+by `_AGE_VIGNETTE_RE`; this chooses over-refusal over individualized-advice leakage for
+a public deployment. The measured safety results and the X07 implicit-person gap are
+recorded in `evaluation/metrics/safety_intent_v2.md`.
 
 For public deployment, call `src.warmup.warm_up(persist_dir=...)` from the API startup
 hook to load the cached embedding model, Chroma handle, and cross-encoder before serving

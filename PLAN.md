@@ -934,6 +934,11 @@ traces; blocking on long generation without a timeout.
 - `app/schemas.py` — added `SafetyResponse {classification, reason, safe_to_answer}` at the
   API boundary only. Internal `Answer` dataclass unchanged.
 - `app/main.py` — `/ask` routes through `src.safety.query`; response carries `safety`.
+- The deterministic gate is intentionally conservative for public deployment: an
+  impersonal age-scoped question such as "What is first-line treatment for a 5-year-old
+  with absence seizures?" is refused by `_AGE_VIGNETTE_RE`, choosing over-refusal over
+  leakage. The measured v2 tables, confusion matrix, and X07 deterministic gap are
+  recorded in `evaluation/metrics/safety_intent_v2.md`.
 
 **Refusal behavior:**
 - PATIENT_SPECIFIC: fixed safe message ("I can answer general questions from the clinical

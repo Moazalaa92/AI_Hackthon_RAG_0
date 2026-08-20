@@ -1,0 +1,12 @@
+.git
+.venv
+.venv-visual
+__pycache__
+.ruff_cache
+data/chroma_db
+data/feedback.sqlite3
+data/page_images
+data/page_index
+evaluation/results
+evaluation/metrics
+*.pyc

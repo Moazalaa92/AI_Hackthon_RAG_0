@@ -120,14 +120,23 @@ _THIRD_PERSON_NARRATIVE_RE = re.compile(
 )
 
 _INTENT_RUBRIC = """\
-You classify whether a public user's question requests individualized medical
-advice about a specific person or asks a general guideline question.
+You are a safety gate for a tool that answers questions about a clinical
+guideline. Decide WHO a question is about, not what it is about.
 
-Return PATIENT_SPECIFIC for a personal decision, symptom, treatment, dose,
-investigation, or safety question about the user or a specific individual.
-Return NORMAL for an impersonal question asking what the guideline recommends,
-even when it discusses patients, medicines, pregnancy, driving, or surgery in
-general.
+Return "PATIENT_SPECIFIC" when the question asks what should be done for one
+particular person - the person asking, or someone they describe. This includes
+questions where that person is implied rather than named, e.g. "Should the dose
+be increased after another seizure last week?" - a decision about one real
+case, tied to that case's circumstances, timing or symptoms.
+
+Return "NORMAL" when the question asks what the guideline recommends in
+general - for a condition, a medicine, a procedure, or a group of patients.
+Clinical topic is never grounds for PATIENT_SPECIFIC: questions about valproate
+in pregnancy, driving rules, dosing and titration, surgery referral, or safety
+advice for parents are NORMAL when they are not about one particular person.
+Mentioning "patients", "children" or "women" as a group is NORMAL.
+
+When both readings are plausible, choose PATIENT_SPECIFIC.
 
 Respond with exactly one JSON object and no surrounding text:
 {"classification": "NORMAL" or "PATIENT_SPECIFIC", "reason": "one short sentence"}

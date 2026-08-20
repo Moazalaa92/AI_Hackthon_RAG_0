@@ -9,8 +9,6 @@ traceability, and client display (chunk id, page, source, ranks, scores,
 text). API keys / credentials / configuration are never exposed here.
 """
 
-from typing import List, Optional
-
 from pydantic import BaseModel, Field, field_validator
 
 QUESTION_MAX_LENGTH = 1000
@@ -43,6 +41,28 @@ class SafetyResponse(BaseModel):
     safe_to_answer: bool
 
 
+class RatingSignals(BaseModel):
+    """Observable signals used to assign an evidence-support band."""
+
+    top1_reranker_score: float | None = None
+    top1_top3_margin: float | None = None
+    page_agreement_top5: int = 0
+    dual_retrieval: bool = False
+    claim_count: int = 0
+    cited_claim_count: int = 0
+    claim_citation_coverage: float = 0.0
+    citations_valid: bool | None = None
+    safety_classification: str
+
+
+class RatingResponse(BaseModel):
+    """Deterministic support band and its explanations."""
+
+    band: str
+    signals: RatingSignals
+    reasons: list[str] = Field(default_factory=list)
+
+
 class HealthResponse(BaseModel):
     """GET /health response."""
 
@@ -54,15 +74,15 @@ class CitationResponse(BaseModel):
 
     citation_id: str
     chunk_id: int
-    document_id: Optional[str] = None
-    source: Optional[str] = None
-    page: Optional[int] = None
-    page_label: Optional[str] = None
-    reranker_rank: Optional[int] = None
-    reranker_score: Optional[float] = None
-    fusion_score: Optional[float] = None
-    rank: Optional[int] = None
-    retrieved_by: Optional[str] = None
+    document_id: str | None = None
+    source: str | None = None
+    page: int | None = None
+    page_label: str | None = None
+    reranker_rank: int | None = None
+    reranker_score: float | None = None
+    fusion_score: float | None = None
+    rank: int | None = None
+    retrieved_by: str | None = None
     supporting_text: str
 
 
@@ -71,23 +91,23 @@ class ClaimResponse(BaseModel):
 
     claim_id: str
     claim_text: str
-    citations: List[CitationResponse] = Field(default_factory=list)
+    citations: list[CitationResponse] = Field(default_factory=list)
 
 
 class RetrievedChunkResponse(BaseModel):
     """A retrieved chunk's metadata, for debugging and traceability."""
 
     chunk_id: int
-    document_id: Optional[str] = None
-    source: Optional[str] = None
-    page: Optional[int] = None
-    page_label: Optional[str] = None
-    section: Optional[str] = None
-    reranker_rank: Optional[int] = None
-    reranker_score: Optional[float] = None
-    fusion_score: Optional[float] = None
-    rank: Optional[int] = None
-    retrieved_by: Optional[str] = None
+    document_id: str | None = None
+    source: str | None = None
+    page: int | None = None
+    page_label: str | None = None
+    section: str | None = None
+    reranker_rank: int | None = None
+    reranker_score: float | None = None
+    fusion_score: float | None = None
+    rank: int | None = None
+    retrieved_by: str | None = None
     chunk_text: str
 
 
@@ -99,16 +119,52 @@ class AskResponse(BaseModel):
     fails closed rather than inventing or broadening citations.
     """
 
+    request_id: str
     question: str
     answer: str
-    claims: List[ClaimResponse] = Field(default_factory=list)
-    retrieved_chunks: List[RetrievedChunkResponse] = Field(default_factory=list)
-    citations_valid: Optional[bool] = None
-    validation_errors: List[str] = Field(default_factory=list)
+    claims: list[ClaimResponse] = Field(default_factory=list)
+    retrieved_chunks: list[RetrievedChunkResponse] = Field(default_factory=list)
+    citations_valid: bool | None = None
+    validation_errors: list[str] = Field(default_factory=list)
     safety: SafetyResponse
+    rating: RatingResponse
 
 
 class ErrorResponse(BaseModel):
     """Safe, user-readable error body (no stack traces / internals)."""
 
     detail: str
+    code: str = "request_error"
+
+
+class FeedbackRequest(BaseModel):
+    """POST /feedback request body."""
+
+    request_id: str = Field(..., min_length=1, max_length=128)
+    helpful: bool
+    reason: str | None = Field(default=None, max_length=1000)
+
+
+class FeedbackResponse(BaseModel):
+    """POST /feedback response."""
+
+    status: str
+
+
+class ReadyResponse(BaseModel):
+    """GET /ready response."""
+
+    status: str
+
+
+class VersionResponse(BaseModel):
+    """GET /version response."""
+
+    corpus: str
+    corpus_version: str
+    corpus_date: str
+    embedding_model: str
+    reranker_model: str
+    generation_model: str
+    prompt_version: str
+    rating_rule_version: str

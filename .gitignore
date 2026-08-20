@@ -5,4 +5,5 @@ data/extracted/
 data/chroma_db/experiments/
 data/page_images/
 data/page_index/
+data/feedback.sqlite3
 .aider*

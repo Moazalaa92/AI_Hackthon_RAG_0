@@ -1,3 +1,12 @@
+---
+title: NICE NG217 Grounded RAG
+emoji: ⚕️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+---
+
 # Hackathon Lectures — Grounded RAG over a NICE Epilepsy Guideline (NG217)
 
 A **retrieval-augmented generation (RAG)** question-answering system over the clinical
@@ -29,7 +38,7 @@ text** that supports it — or the system refuses rather than invent.
 | **Citations / traceability** | **IMPLEMENTED / VALIDATED** |
 | **End-to-end pipeline** | **DONE** (Phase 10 — `src/pipeline.py`) |
 | **FastAPI API** | **DONE** (Phase 10.5 — `app/main.py`) |
-| **Safety / guardrails** | **IN PROGRESS** (Phase 11 — being designed & evaluated) |
+| **Safety / guardrails** | **IMPLEMENTED** (Phase 11) |
 | **Confidence / observability** | NEXT (Phase 12) |
 | **End-to-end evaluation** | NEXT (Phase 13) |
 | **UI / client** | OPTIONAL / LATER (Phase 14, Gradio is *not* the production backend) |
@@ -476,9 +485,10 @@ python scripts/ask.py "Which medicine is offered as first-line treatment for abs
 
 ## FastAPI API (Phase 10.5 — `app/main.py`)
 
-A thin HTTP layer over `src.pipeline.query()`. The API is intentionally minimal and
-**stateless**: no auth, no streaming, no conversation memory. All RAG logic stays in the
-pipeline; the routes only transport requests and responses.
+A thin HTTP layer over `src.pipeline.query()`. The API is intentionally stateless with no
+conversation memory. It adds bounded in-process concurrency, readiness, rate limiting,
+question caching, and SQLite calibration logging for the public Space. All RAG logic
+stays in the pipeline.
 
 ```text
 Client → FastAPI → RAG pipeline → structured response
@@ -529,9 +539,47 @@ The API provides:
 
 ---
 
-## Safety / guardrails (Phase 11 — IN PROGRESS)
+## Public Space app (Phase A)
 
-**Safety is being designed and evaluated — it is not implemented yet.** Do not claim it is.
+The shareable Docker Space runs one FastAPI process with the Gradio UI mounted
+at `/`, on port 7860. It warms the embedding, Chroma, and reranker handles at
+startup, limits concurrent pipeline work to two requests, caches repeated
+normalised questions, and exposes `/ready`, `/version`, `/feedback`, and `/ask`.
+The UI collapses the raw `high` and `medium` API bands into one evidence
+property: **Supported: every claim is cited to a guideline page.** The raw
+`low` band is shown as **Citations incomplete — treat with caution.** These are
+not accuracy tiers; the API still returns the four raw bands unchanged. The
+corpus-level measurement shown once in the UI is documented in the
+[rating calibration evidence](evaluation/metrics/rating_calibration_v1.md).
+The permanent disclaimer says that the service is informational, based on NICE
+NG217, and not individualised medical advice.
+
+Deployment steps:
+
+1. Create a new Hugging Face Space and select the Docker SDK.
+2. Add these Space secrets/variables:
+
+```text
+LLM_API_KEY=<Space secret>
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=deepseek/deepseek-v4-flash
+SAFETY_INTENT_LLM_ENABLED=1
+```
+
+3. Push this repository branch to the Space. The `Dockerfile` installs the pinned
+dependencies and runs the documented 800/100 ingestion during the image build,
+so the 444-chunk Chroma store is included in the image without storing a key in
+the repository. Optional controls are documented in `.env.example`, including
+the per-IP hourly limit, global daily cap, timeout, cache size, and SQLite path.
+
+Feedback and request logs use SQLite under `data/` by default. A Space's
+filesystem and its SQLite feedback database are ephemeral, so this is suitable
+for calibration during a session; use a persistent external backend for
+production history. The per-IP limiter trusts the first hop of
+`X-Forwarded-For`, which is appropriate for the Hugging Face platform proxy;
+deployments with a different proxy topology must preserve that trust boundary.
+
+## Safety / guardrails (Phase 11 — implemented)
 
 The approved direction is a minimal, explicit, explainable three-way policy:
 
@@ -543,8 +591,31 @@ The approved direction is a minimal, explicit, explainable three-way policy:
   the requested answer.")
 
 Design principles in scope: fail closed (never silently assume a request is safe), keep it
-small (no policy engines, no conversation memory, no external safety APIs), and evaluate
-the policy with a dedicated safety dataset (false positives *and* false negatives).
+small (no policy engines, no conversation memory), and evaluate the policy with a dedicated
+safety dataset (false positives *and* false negatives).
+
+The pre-retrieval intent gate has two layers:
+
+- **Layer 1 (always on):** a deterministic, small gate matching first-person references,
+  age vignettes, singular individual references, and selected third-person clinical
+  narratives. It is deliberately not a topic matcher, so general questions about
+  valproate, driving, dosing, swimming, surgery, or patients remain NORMAL.
+- **Layer 2 (optional):** an LLM intent classifier runs only when layer 1 returns NORMAL.
+  Set `SAFETY_INTENT_LLM_ENABLED=1` in the deployed environment to enable it. It is
+  OFF by default, retries once on provider failure, and preserves the layer-1 result if
+  both attempts fail. The returned `SafetyResult.reason` identifies the deciding layer.
+
+The deterministic gate is deliberately conservative. An impersonal age-scoped question
+such as “What is first-line treatment for a 5-year-old with absence seizures?” is refused
+by `_AGE_VIGNETTE_RE`; this chooses over-refusal over individualized-advice leakage for
+a public deployment. The measured safety results and the X07 implicit-person gap are
+recorded in `evaluation/metrics/safety_intent_v2.md`.
+
+For public deployment, call `src.warmup.warm_up(persist_dir=...)` from the API startup
+hook to load the cached embedding model, Chroma handle, and cross-encoder before serving
+the first request. Embeddings, vectorstore handles, and rerankers are cached once per
+process and keyed by their construction parameters; lazy initialization is locked for
+concurrent requests.
 
 Future phases: **Confidence / observability** (Phase 12), **End-to-end evaluation**
 (Phase 13), optional **UI / client** (Phase 14).
@@ -583,9 +654,9 @@ A 60-second version of the whole project, answers to the questions a reviewer wi
 10. **What are the limitations?** Top-3/top-5 precision density is the retrieval weakness;
     Generation has occasional multi-part omissions, neighbor-recommendation conflation, and
     over-abstention; citation support is 90.1% under the LLM judge; all labels are
-    LLM-judged, not clinical validation; safety guardrails are not yet implemented.
-11. **What is next?** Safety/guardrails (in progress), then confidence/observability, then
-    end-to-end evaluation, then an optional UI.
+    LLM-judged, not clinical validation; safety guardrails are not a clinical guarantee.
+11. **What is next?** Confidence/observability, then end-to-end evaluation, then an
+    optional UI.
 
 **The central story: "Build → Measure → Diagnose → Improve → Validate → Integrate."**
 
@@ -826,4 +897,5 @@ downloaded from Hugging Face on first use.
 ---
 
 *Retrieval metrics are LLM-judged evidence, not clinical validation. Safety guardrails are
-in progress and not yet implemented. See `PLAN.md` for the full plan and phase status.*
+implemented but are not a clinical guarantee. See `PLAN.md` for the full plan and phase
+status.*
